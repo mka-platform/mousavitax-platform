@@ -91,8 +91,8 @@ mousavitax-platform/
 
 - [x] ایجاد ریپازیتوری تحت سازمان mka-platform
 - [x] تعریف چشم‌انداز و اهداف وب‌سایت
-- [ ] اسکلت packages و apps
-- [ ] اتصال واقعی دانش رسمی
+- [x] اسکلت packages / apps / services / knowledge / infra / scripts
+- [ ] اتصال واقعی دانش رسمی و انتقال کد هسته‌ها
 - [ ] راه‌اندازی وب‌سایت MVP
 - [ ] اتصال ربات تلگرام
 
