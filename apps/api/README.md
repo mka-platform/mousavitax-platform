@@ -1,12 +1,3 @@
-# apps/api
+# apps/api — API Gateway
 
-API Gateway و orchestration لایه سرویس‌ها.
-
-## مسئولیت‌ها
-- احراز هویت و مجوزها
-- Rate limiting
-- مسیریابی به knowledge-core، taxlaw-engine و سایر ماژول‌ها
-- ارائه API عمومی برای وب و ربات
-
-## وضعیت
-اسکلت اولیه.
+FastAPI single entry point (ADR-004). Clients (web, telegram, admin) فقط از اینجا عبور می‌کنند.

@@ -1,54 +1,37 @@
-# Roadmap — MousaviTax Platform
+# Roadmap — MousaviTax / MKA Holding
 
-## فاز ۰ — Foundation (انجام‌شده / در حال تکمیل)
+## فاز ۰ — Foundation
 
-- [x] ایجاد سازمان و ریپازیتوری mka-platform/mousavitax-platform
-- [x] تعریف Vision و Website Goals
-- [x] تعریف Architecture اولیه
-- [x] اسکلت پوشه‌های packages / apps / services
-- [x] تعریف ADRهای کلیدی (Stack وب، مدل داده دانش، استراتژی انتقال، API، Vector Store)
-- [ ] تنظیم CI پایه و Docker Compose اولیه
+- [x] مخزن یکپارچه تحت mka-platform
+- [x] Vision هلدینگ + Domain-Agnostic Core
+- [x] ADRهای کلیدی
+- [x] انتقال shared, document-parser, embedding, retrieval, ai-gateway
+- [x] API Gateway + Telegram Bot
+- [x] Domain pack اولیه iran-tax
+- [ ] CI پایه
 
-## فاز ۱ — Knowledge & Core AI (اولویت بالا)
+## فاز ۱ — Knowledge
 
-- [x] انتقال `packages/shared` (مدل‌های ADR-002)
-- [x] انتقال `packages/document-parser`
-- [ ] انتقال retrieval-engine + embedding → knowledge-core
-- [ ] اتصال TAXLAW-GROK و ALTIP به taxlaw-engine
-- [ ] بارگذاری اولیه دانش رسمی (قوانین، بخشنامه‌های کلیدی)
-- [ ] ربات تلگرام MVP با پاسخ مستند
+- [ ] اتصال retrieval واقعی به RAG endpoint
+- [ ] بارگذاری دانش رسمی (قوانین / بخشنامه‌ها)
+- [ ] pgvector production path
+- [ ] Google Drive Sync
 
-## فاز ۲ — وب‌سایت MVP (الهام از namatsp + AI)
+## فاز ۲ — Web MVP
 
-- اسکلت apps/web با Next.js 15 + RTL (طبق ADR-001)
-- صفحه اصلی و لندینگ فارسی
-- چت‌بات دانش‌محور با Citation
-- لیست مشاوران و درخواست مشاوره (تلفنی / متنی)
-- سیستم پرسش و پاسخ عمومی
-- احراز هویت پایه و پنل مودی ساده
+- [ ] apps/web Next.js 15 + RTL
+- [ ] چت با Citation + لیست مشاوران
 
 ## فاز ۳ — خدمات عملیاتی
 
-- جریان تنظیم اظهارنامه (راهنما + نیمه‌خودکار)
-- تولید پیش‌نویس لایحه با کنترل انسانی
-- راهنمای گام‌به‌گام سامانه مودیان
-- پنل مشاوران
+- [ ] taxlaw-engine (لایحه)
+- [ ] راهنمای اظهارنامه و سامانه مودیان
+- [ ] پنل مشاور / مودی
 
-## فاز ۴ — مقیاس و انطباق
+## فاز ۴ — گسترش هلدینگ
 
-- بهبود کیفیت Citation و Temporal Validity
-- Audit trail کامل
-- پنل ادمین پیشرفته
-- بهینه‌سازی هزینه LLM و latency
-- آماده‌سازی برای اتصال به سرویس‌های رسمی (در صورت امکان)
+- [ ] دومین Domain Pack نمونه
+- [ ] Multi-tenant collections
+- [ ] Audit trail و مقیاس
 
-## فاز ۵ — گسترش
-
-- اپلیکیشن موبایل
-- سیستم امتیازدهی و وفاداری
-- گزارش‌های تحلیلی برای کسب‌وکارها
-- ماژول‌های تخصصی بیشتر (املاک، ارث، ...)
-
----
-
-**اولویت فعلی:** ادامه فاز ۱ — انتقال retrieval-engine و embedding به knowledge-core
+**اولویت فعلی:** ایندکس دانش + اتصال retrieval به `/v1/rag/query`

@@ -1,0 +1,15 @@
+domain_id: iran-tax
+display_name: "مشاوره مالیاتی ایران"
+collection: iran_tax_official
+language: fa
+direction: rtl
+
+disclaimer: |
+  این سامانه جایگزین مشاور رسمی مالیاتی یا وکیل نیست.
+  پاسخ‌ها جنبه راهنمایی دارند؛ تصمیم نهایی با مودی و مشاور مجاز است.
+
+citation_required: true
+temporal_validity: true
+human_in_the_loop_for:
+  - layeha_final
+  - declaration_submit

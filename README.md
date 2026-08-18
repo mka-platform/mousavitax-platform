@@ -1,39 +1,25 @@
-# MousaviTax Platform
+# MousaviTax Platform (MKA Holding)
 
-**پلتفرم جامع مشاوره و خدمات مالیاتی هوشمند ایران**
+**هلدینگ پلتفرم دانش‌محور — دامنه اول: مشاوره و خدمات مالیاتی هوشمند ایران**
 
-> ترکیب هسته دانش‌محور (MKA) + لایحه‌نویسی مبتنی بر شواهد + ربات مشاور + وب‌سایت بازار مشاوره انسانی و هوش مصنوعی
+> هستهٔ Domain-Agnostic (MKA) + Vertical مالیاتی + قابلیت گسترش به حوزه‌های دیگر
 
-سازمان: [mka-platform](https://github.com/mka-platform)
-
----
-
-## چشم‌انداز
-
-MousaviTax Platform یک پلتفرم یکپارچه برای ارائه خدمات مالیاتی در ایران است که:
-
-- پاسخ‌های دقیق و مستند (با Citation) به سوالات مالیاتی می‌دهد
-- امکان تنظیم اظهارنامه، لایحه دفاعیه و اعتراض به برگ تشخیص را فراهم می‌کند
-- مشاوران انسانی و دستیار هوش مصنوعی را در یک اکوسیستم هیبریدی کنار هم قرار می‌دهد
-- با الزامات سامانه مودیان، قانون پایانه‌های فروشگاهی و قوانین جاری مالیاتی ایران هماهنگ است
-
-**هدف نهایی:** تبدیل شدن به مرجع قابل‌اعتماد مشاوره مالیاتی آنلاین در ایران با ترکیب قدرت دانش رسمی + هوش مصنوعی کنترل‌شده + تخصص انسانی.
+سازمان: [mka-platform](https://github.com/mka-platform)  
+مرجع یکپارچهٔ اهداف **MKA-Core** و **MousaviTax Platform**
 
 ---
 
-## پروژه‌های یکپارچه‌شده (فقط مالیاتی)
+## چشم‌انداز هلدینگ
 
-| ماژول | منبع اصلی | نقش در پلتفرم |
-|-------|-----------|---------------|
-| **MKA Core** | Modular Knowledge Assistant | هسته مدیریت دانش، RAG، Citation و معماری ماژولار |
-| **MousaviTax-AI** | ziya1346/MousaviTax-AI | ماژول مشاوره و پردازش مالیاتی + Multi-Agent |
-| **TAXLAW-GROK** | Drive | موتور پژوهش و لایحه‌نویسی مبتنی بر شواهد |
-| **ALTIP Layeha Agent** | Drive | پروتوتایپ کنترل‌شده لایحه‌نویسی |
-| **Tax-AI-Bot** | ziya1346/Tax-AI-Bot | ربات تلگرام مشاور مالیاتی |
-| **DTaxCrawler** | ziya1346/DTaxCrawler | کرالر و جمع‌آوری منابع رسمی مالیاتی |
-| **Source Bridge** | ALTIP Official Source Bridge | دسترسی به منابع رسمی |
+این مخزن **منبع حقیقت واحد** است:
 
-> پروژه‌های حسابداری خالص، گردشگری، پزشکی و تریدر عمداً خارج از این پلتفرم نگه داشته شده‌اند.
+| لایه | نقش |
+|------|------|
+| **Core (MKA)** | RAG، Citation، Parser، Embedding، AI Gateway، API Gateway — مستقل از دامنه |
+| **Vertical: Iran Tax** | دانش رسمی مالیاتی، taxlaw-engine، بازار مشاوران، اظهارنامه، لایحه |
+| **Future Verticals** | حقوقی، حسابداری، پزشکی، آموزش، ... از طریق `domains/` و Prompt/Collection جدا |
+
+اصول: Knowledge First · Citation اجباری · Human-in-the-loop · Temporal Validity · Zero Fabrication · Modular & Extensible
 
 ---
 
@@ -41,79 +27,94 @@ MousaviTax Platform یک پلتفرم یکپارچه برای ارائه خدم�
 
 ```text
 mousavitax-platform/
-├── docs/                     # مستندات کامل (Vision, Architecture, Roadmap, ...)
-├── packages/                 # هسته‌های مشترک
-│   ├── knowledge-core/       # مدیریت دانش + RAG + Citation
-│   ├── taxlaw-engine/        # موتور لایحه و تحلیل حقوقی-مالیاتی
+├── packages/                 # هسته مشترک (Domain-Agnostic)
+│   ├── shared/               # مدل‌ها و قراردادها (ADR-002)
 │   ├── document-parser/
+│   ├── embedding-service/
 │   ├── retrieval-engine/
-│   └── shared/
+│   ├── ai-gateway/
+│   ├── knowledge-core/       # orchestration دانش
+│   ├── taxlaw-engine/        # موتور لایحه (دامنه مالیات)
+│   └── prompt-engine/
 ├── apps/
-│   ├── web/                  # وب‌سایت اصلی (Next.js + RTL + فارسی)
-│   ├── api/                  # API Gateway
-│   ├── telegram-bot/         # ربات مشاور مالیاتی
-│   └── admin/                # پنل مدیریت
+│   ├── api/                  # FastAPI – API Gateway
+│   ├── web/                  # Next.js + RTL (بازار + چت)
+│   ├── telegram-bot/         # @taxiran1395_bot
+│   └── admin/
 ├── services/
-│   ├── crawler/              # DTaxCrawler
+│   ├── crawler/
+│   ├── google-drive-sync/
 │   └── source-bridge/
-├── knowledge/                # مخزن قوانین، بخشنامه‌ها، آراء
-├── infra/                    # Docker, CI/CD
+├── domains/
+│   └── iran-tax/             # دانش، پرامپت‌ها، config دامنه مالیات
+├── knowledge/                # مخزن اسناد خام (اختیاری)
+├── docs/                     # Vision, Architecture, ADRs, Roadmap
+├── infra/                    # Docker Compose
 └── scripts/
 ```
 
 ---
 
-## اهداف وب‌سایت (الهام از moshaver.namatsp.ir + قدرت AI)
+## اهداف یکپارچه‌شده
 
-1. **مشاوره هیبریدی ۲۴ ساعته**  
-   چت‌بات دانش‌محور با Citation + اتصال فوری به مشاوران انسانی
+### از MKA-Core
+- هسته ماژولار دانش‌محور
+- RAG + Citation
+- Google Drive Sync، Document Parser، Embedding، Retrieval
+- API Gateway، Telegram Bot، Admin Panel
+- Domain-Agnostic برای گسترش به حوزه‌های دیگر
 
-2. **خدمات تخصصی مالیاتی ایران**  
-   - تنظیم اظهارنامه عملکرد و ارزش افزوده  
-   - تهیه لایحه دفاعیه و اعتراض به برگ تشخیص  
-   - راهنمایی سامانه مودیان و صورتحساب الکترونیکی  
-   - تحلیل پرونده و پیشنهاد راهکار
-
-3. **بازار مشاوران**  
-   پروفایل مشاوران، درخواست مشاوره تلفنی/متنی/حضوری، پرسش و پاسخ عمومی
-
-4. **امنیت و انطباق قانونی**  
-   حفظ حریم خصوصی مودی، عدم جایگزینی مشاور رسمی، ثبت audit trail
-
-5. **توسعه آینده**  
-   پنل مودی، اتصال به APIهای رسمی (در صورت امکان)، سیستم وفاداری
-
-جزئیات کامل در [`docs/02_WEBSITE_GOALS.md`](docs/02_WEBSITE_GOALS.md)
+### از MousaviTax
+- مشاوره هیبریدی (انسان + AI)
+- خدمات عملیاتی: اظهارنامه، لایحه دفاعیه، سامانه مودیان
+- بازار مشاوران (الهام از namatsp)
+- انطباق با قوانین و رویه‌های مالیاتی ایران
+- Temporal Validity روی دانش رسمی
 
 ---
 
-## وضعیت فعلی
+## راه‌اندازی سریع
 
-- [x] ایجاد ریپازیتوری تحت سازمان mka-platform
-- [x] تعریف چشم‌انداز و اهداف وب‌سایت
-- [x] اسکلت packages / apps / services / knowledge / infra / scripts
-- [ ] اتصال واقعی دانش رسمی و انتقال کد هسته‌ها
-- [ ] راه‌اندازی وب‌سایت MVP
-- [ ] اتصال ربات تلگرام
+```bash
+cp .env.example .env
+# TELEGRAM_BOT_TOKEN، کلید LLM را پر کنید
 
----
+# API
+cd apps/api && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8000
 
-## پیش‌نیازهای فوری از مالک پروژه
+# ربات (ترمینال جدا)
+cd apps/telegram-bot && pip install -r requirements.txt && python -m app.bot
+```
 
-1. توکن ربات تلگرام `@taxiran1395_bot`
-2. کلیدهای LLM (OpenAI / Gemini / سازگار با OpenAI)
-3. دسترسی Service Account به Google Drive (برای همگام‌سازی دانش)
-4. تصمیم در مورد دامنه و هاستینگ وب‌سایت
+یا با Docker:
 
----
-
-## مجوز و مالکیت
-
-کلیه حقوق مادی و معنوی متعلق به مالک پروژه و سازمان mka-platform است.  
-این پلتفرم جایگزین مشاور رسمی مالیاتی یا وکیل نیست و صرفاً ابزار کمکی محسوب می‌شود.
+```bash
+docker compose -f infra/docker-compose.yml up --build
+```
 
 ---
 
-**سازمان:** [mka-platform](https://github.com/mka-platform)  
-**نگهدارنده:** ziya1346  
-**ایمیل:** ziya.mka2026@gmail.com
+## وضعیت
+
+- [x] یکپارچه‌سازی چشم‌انداز هلدینگ + ADRها
+- [x] packages: shared, document-parser, embedding, retrieval, ai-gateway
+- [x] apps/api (FastAPI Gateway) + apps/telegram-bot
+- [x] domains/iran-tax (پرامپت و config اولیه)
+- [ ] ایندکس دانش رسمی + pgvector production
+- [ ] apps/web (Next.js RTL MVP)
+- [ ] taxlaw-engine کامل + پنل مشاوران
+
+جزئیات: [`docs/03_ROADMAP.md`](docs/03_ROADMAP.md)
+
+---
+
+## پیش‌نیازها
+
+1. توکن ربات `@taxiran1395_bot`
+2. کلید LLM (Ollama / Gemini / OpenAI-compatible)
+3. (اختیاری) Google Service Account برای Drive Sync
+
+---
+
+**نگهدارنده:** ziya1346 · **ایمیل:** ziya.mka2026@gmail.com  
+این پلتفرم جایگزین مشاور رسمی یا وکیل نیست.

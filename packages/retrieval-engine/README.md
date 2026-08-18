@@ -1,6 +1,5 @@
 # retrieval-engine
 
-موتور بازیابی معنایی + رتبه‌بندی و Citation.
+جستجوی معنایی + Citation. Interface قابل تعویض (InMemory → pgvector).
 
-## وضعیت
-اسکلت اولیه.
+منتقل‌شده از MKA-Core؛ collection پیش‌فرض: `iran_tax_official`.
