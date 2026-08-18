@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -15,6 +16,11 @@ from pydantic import BaseModel, Field
 ROOT = Path(__file__).resolve().parents[2]
 load_dotenv(ROOT / ".env")
 load_dotenv()
+
+# Default vector path relative to repo
+os.environ.setdefault(
+    "VECTOR_DB_PATH", str(ROOT / "data" / "iran_tax_vectors.json")
+)
 
 PACKAGES = ROOT / "packages"
 for sub in (
@@ -54,7 +60,7 @@ except ImportError:
 app = FastAPI(
     title="MousaviTax API Gateway",
     description="MKA/ARYA Holding – Iran Tax · APCS + Retrieval",
-    version="0.5.0",
+    version="0.5.1",
     contact={"email": "ziya.mka2026@gmail.com"},
 )
 app.add_middleware(
@@ -91,10 +97,18 @@ class APCSQueryRequest(BaseModel):
 
 @app.get("/health", response_model=HealthResponse)
 async def health():
+    return HealthResponse(version="0.5.1")
+
+
+@app.get("/v1/knowledge/status")
+async def knowledge_status():
     ks = get_knowledge()
-    extra = {"knowledge_chunks": ks.count() if ks else 0}
-    h = HealthResponse(version="0.5.0")
-    return h
+    return {
+        "available": ks is not None,
+        "chunks": ks.count() if ks else 0,
+        "vector_db_path": os.environ.get("VECTOR_DB_PATH"),
+        "embedding_provider": os.environ.get("EMBEDDING_PROVIDER", "ollama"),
+    }
 
 
 def _hits_to_citations(hits: list[dict]) -> list[Citation]:
@@ -112,7 +126,7 @@ def _hits_to_citations(hits: list[dict]) -> list[Citation]:
                     source_type=source_type,
                     title=str(h.get("title") or "بدون عنوان"),
                     chunk_id=str(h.get("chunk_id") or ""),
-                    score=float(h.get("score") or 0.0),
+                    score=float(min(max(h.get("score") or 0.0, 0.0), 1.0)),
                     page=h.get("page"),
                     section=h.get("section"),
                     url=h.get("url"),
@@ -148,14 +162,12 @@ async def apcs_query(request: APCSQueryRequest):
                 if not vr.ok:
                     raise HTTPException(status_code=400, detail={"apcs_errors": vr.errors})
 
-        # Retrieval
         hits: list[dict] = []
         qtext = request.query or (cmd.task if cmd else None) or ""
         ks = get_knowledge()
         if ks and qtext and not request.skip_retrieval:
             hits = ks.query(qtext, top_k=request.top_k)
 
-        # Prompt build
         if cmd and PromptBuilder:
             built = PromptBuilder(domain=request.domain).build(
                 cmd, retrieved_context=hits, user_message=request.query
@@ -195,7 +207,7 @@ async def apcs_query(request: APCSQueryRequest):
                 Citation(
                     source_id="pending-index",
                     source_type=SourceType.MANUAL,
-                    title="دانش رسمی ایندکس‌نشده یا بدون hit — از ادعای قطعی قانونی خودداری شود",
+                    title="دانش ایندکس‌نشده یا بدون hit — ابتدا scripts/seed_knowledge.py را اجرا کنید",
                     chunk_id="gen-001",
                     score=0.0,
                     section="موقت",
@@ -225,10 +237,11 @@ async def root():
         "holding": "MKA / ARYA",
         "domain": "iran-tax",
         "apcs": "v1.0",
-        "version": "0.5.0",
+        "version": "0.5.1",
         "knowledge_chunks": ks.count() if ks else 0,
         "docs": "/docs",
         "rag": "/v1/rag/query",
         "apcs_query": "/v1/apcs/query",
+        "knowledge_status": "/v1/knowledge/status",
         "llm_provider": gateway.provider,
     }
