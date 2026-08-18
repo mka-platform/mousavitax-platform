@@ -1,4 +1,4 @@
-"""APCS command models (Phase 1 + extensible fields)."""
+"""APCS command models (Phase 1–3)."""
 
 from __future__ import annotations
 
@@ -9,12 +9,12 @@ from pydantic import BaseModel, Field
 
 
 class EvidenceLevel(str, Enum):
-    E0 = "E0"  # no evidence
-    E1 = "E1"  # user claim
-    E2 = "E2"  # raw data
-    E3 = "E3"  # provided document
-    E4 = "E4"  # official source
-    E5 = "E5"  # multi-confirmed official
+    E0 = "E0"
+    E1 = "E1"
+    E2 = "E2"
+    E3 = "E3"
+    E4 = "E4"
+    E5 = "E5"
 
 
 class OutputFormat(str, Enum):
@@ -29,9 +29,14 @@ class OutputFormat(str, Enum):
     STRUCTURED_TAX_REPORT = "STRUCTURED_TAX_REPORT"
 
 
-class APCSCommand(BaseModel):
-    """Parsed APCS command – Phase 1 core fields + optional extensions."""
+class RiskLevel(str, Enum):
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    CRITICAL = "CRITICAL"
 
+
+class APCSCommand(BaseModel):
     role: Optional[str] = None
     persona: Optional[str] = None
     task: Optional[str] = None
@@ -45,17 +50,36 @@ class APCSCommand(BaseModel):
     constraints: list[str] = Field(default_factory=list)
     guardrail: Optional[str] = None
     method: Optional[str] = None
+    analyze: Optional[str] = None
     perspectives: list[str] = Field(default_factory=list)
     compare: Optional[str] = None
     risk: Optional[str] = None
     pitfalls: Optional[str] = None
+    assumptions: Optional[str] = None
     metrics: list[str] = Field(default_factory=list)
+    verify: bool = False
+    self_check: bool = False
+    quality_gate: bool = False
+    decision: Optional[str] = None
+    decision_rule: Optional[str] = None
     format: OutputFormat = OutputFormat.MARKDOWN
     audience: Optional[str] = None
     tone: Optional[str] = None
-    decision_rule: Optional[str] = None
+    exec_summary: bool = False
     domain_id: Optional[str] = None
     raw_blocks: dict[str, str] = Field(default_factory=dict)
     extras: dict[str, Any] = Field(default_factory=dict)
 
     model_config = {"populate_by_name": True}
+
+
+class ValidationResult(BaseModel):
+    ok: bool = True
+    errors: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+
+
+class QualityGateResult(BaseModel):
+    passed: bool = True
+    status: Optional[str] = None  # INSUFFICIENT_DATA | CONFLICTING_EVIDENCE | ...
+    reasons: list[str] = Field(default_factory=list)

@@ -1,4 +1,4 @@
-"""APCS text parser – extracts /COMMAND blocks into APCSCommand."""
+"""APCS text parser – Phase 1–3 commands."""
 
 from __future__ import annotations
 
@@ -7,16 +7,12 @@ from typing import Optional
 
 from .models import APCSCommand, EvidenceLevel, OutputFormat
 
-# Match /COMMAND or /COMMAND: value  (value may span lines until next /CMD)
-_BLOCK_RE = re.compile(
-    r"^/([A-Z][A-Z0-9_-]*)\s*:?\s*(.*)$",
-    re.MULTILINE,
-)
+
+def _truthy(val: str) -> bool:
+    return val.strip().upper() in ("ON", "TRUE", "YES", "1", "REQUIRED")
 
 
 class APCSParser:
-    """Parse APCS command text into structured APCSCommand (Phase 1)."""
-
     def parse(self, text: str) -> APCSCommand:
         if not text or not text.strip():
             return APCSCommand()
@@ -72,14 +68,21 @@ class APCSParser:
             constraints=lines_list("CONSTRAINTS"),
             guardrail=blocks.get("GUARDRAIL") or None,
             method=blocks.get("METHOD") or None,
+            analyze=blocks.get("ANALYZE") or None,
             perspectives=lines_list("PERSPECTIVES") or lines_list("MULTI-PERSPECTIVE"),
             compare=blocks.get("COMPARE") or None,
             risk=blocks.get("RISK") or None,
             pitfalls=blocks.get("PITFALLS") or None,
+            assumptions=blocks.get("ASSUMPTIONS") or None,
             metrics=lines_list("METRICS"),
+            verify=_truthy(blocks.get("VERIFY", "")),
+            self_check=_truthy(blocks.get("SELF-CHECK", "")),
+            quality_gate=_truthy(blocks.get("QUALITY-GATE", "")),
+            decision=blocks.get("DECISION") or None,
+            decision_rule=blocks.get("DECISION-RULE") or None,
             format=fmt,
             audience=blocks.get("AUDIENCE") or None,
             tone=blocks.get("TONE") or None,
-            decision_rule=blocks.get("DECISION-RULE") or None,
+            exec_summary=_truthy(blocks.get("EXEC", "")),
             raw_blocks=blocks,
         )

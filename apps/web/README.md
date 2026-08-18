@@ -1,13 +1,15 @@
 # apps/web
 
-وب‌سایت اصلی پلتفرم (Next.js + TypeScript + Tailwind + RTL فارسی).
+وب‌سایت MousaviTax — Next.js 15 App Router + Tailwind + RTL (ADR-001).
 
-## اهداف MVP
-- لندینگ و معرفی خدمات
-- چت‌بات دانش‌محور با Citation
-- لیست مشاوران و درخواست مشاوره
-- پرسش و پاسخ عمومی
-- احراز هویت و پنل مودی ساده
+```bash
+cd apps/web
+npm install
+NEXT_PUBLIC_API_URL=http://localhost:8000 npm run dev
+```
 
-## وضعیت
-اسکلت اولیه.
+صفحات:
+- `/` لندینگ
+- `/chat` چت RAG
+- `/advisors` بازار مشاوران (اسکلت)
+- `/services` خدمات عملیاتی (اسکلت)

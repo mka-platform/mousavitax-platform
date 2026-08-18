@@ -1,37 +1,19 @@
-# Roadmap — MousaviTax / MKA Holding
+# Roadmap — MousaviTax / MKA / ARYA Holding
 
-## فاز ۰ — Foundation
+## انجام‌شده
 
-- [x] مخزن یکپارچه تحت mka-platform
-- [x] Vision هلدینگ + Domain-Agnostic Core
-- [x] ADRهای کلیدی
-- [x] انتقال shared, document-parser, embedding, retrieval, ai-gateway
-- [x] API Gateway + Telegram Bot
-- [x] Domain pack اولیه iran-tax
-- [ ] CI پایه
+- [x] Holding vision + Domain-Agnostic Core
+- [x] ADR-001…006 (شامل APCS)
+- [x] packages: shared, parser, embedding, retrieval, ai-gateway, prompt-engine, knowledge-core
+- [x] API Gateway با retrieval + APCS Phase 1–3 (Validator, Quality Gate)
+- [x] Telegram bot adapter
+- [x] domains/iran-tax profile
+- [x] apps/web اسکلت Next.js RTL + صفحه چت
 
-## فاز ۱ — Knowledge
+## بعدی
 
-- [ ] اتصال retrieval واقعی به RAG endpoint
-- [ ] بارگذاری دانش رسمی (قوانین / بخشنامه‌ها)
-- [ ] pgvector production path
-- [ ] Google Drive Sync
-
-## فاز ۲ — Web MVP
-
-- [ ] apps/web Next.js 15 + RTL
-- [ ] چت با Citation + لیست مشاوران
-
-## فاز ۳ — خدمات عملیاتی
-
+- [ ] ایندکس واقعی دانش رسمی (قوانین/بخشنامه‌ها)
+- [ ] pgvector production
+- [ ] UI مشاوران و احراز هویت
 - [ ] taxlaw-engine (لایحه)
-- [ ] راهنمای اظهارنامه و سامانه مودیان
-- [ ] پنل مشاور / مودی
-
-## فاز ۴ — گسترش هلدینگ
-
-- [ ] دومین Domain Pack نمونه
-- [ ] Multi-tenant collections
-- [ ] Audit trail و مقیاس
-
-**اولویت فعلی:** ایندکس دانش + اتصال retrieval به `/v1/rag/query`
+- [ ] APCS Phase 4–5 (Score/Weight کامل، Audit log)
