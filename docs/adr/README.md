@@ -1,6 +1,6 @@
 # Architecture Decision Records (ADR)
 
-این پوشه تصمیم‌های معماری مهم پلتفرم MousaviTax را ثبت می‌کند.
+این پوشه تصمیم‌های معماری مهم پلتفرم MousaviTax / MKA Holding را ثبت می‌کند.
 
 فرمت هر ADR:
 - **Status:** Proposed | Accepted | Deprecated | Superseded
@@ -16,6 +16,7 @@
 | [ADR-003](ADR-003-Core-Migration-Strategy.md) | استراتژی انتقال هسته از MKA-Core و TAXLAW-GROK | Accepted |
 | [ADR-004](ADR-004-API-Layer.md) | لایه API و Gateway | Accepted |
 | [ADR-005](ADR-005-Vector-Store-and-Embedding.md) | Vector Store و Embedding | Accepted |
+| [ADR-006](ADR-006-APCS-Prompt-Engine.md) | APCS به‌عنوان موتور پرامپت مرکزی (ARYA) | Accepted |
 
 ## قوانین
 

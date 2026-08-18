@@ -1,37 +1,28 @@
-# Holding Vision — MKA / MousaviTax
+# Holding Vision — MKA / ARYA / MousaviTax
 
 ## مدل هلدینگ
 
-MousaviTax Platform به‌عنوان **هلدینگ فناوری دانش‌محور** طراحی می‌شود:
+1. **Core (MKA)** — RAG، Citation، Parser، Embedding، AI Gateway، **APCS Prompt Engine**
+2. **Vertical / Domain Pack** — هر حوزه یک pack:
+   - knowledge collection
+   - `apcs_profile.yaml` + prompts
+   - اختیاری: Domain Adapter
+3. **محصولات** — Web، Telegram، API، Admin
 
-1. **Core (MKA)** — یک بار ساخته می‌شود، برای همه دامنه‌ها مشترک است.
-2. **Vertical / Domain Pack** — هر حوزه کسب‌وکار (مالیات، حقوقی، پزشکی، ...) یک pack مستقل است:
-   - knowledge collection جدا
-   - prompt templates جدا
-   - قوانین ایمنی و disclaimer جدا
-   - در صورت نیاز Domain Adapter نازک (بدون آلوده کردن Core)
+## APCS
 
-3. **محصولات سطحی** — وب، ربات، API، پنل — روی همان Core و Domain Packها سوار می‌شوند.
+استاندارد مادر پرامپت: **APCS v1.0** (`docs/standards/APCS-v1.0.md`, ADR-006).
+
+```
+APCS Core + Tax Profile + Knowledge Profile + (آینده) Trader / Legal / ...
+```
 
 ## دامنه فعلی: Iran Tax
 
 - مسیر: `domains/iran-tax/`
-- Collection پیش‌فرض: `iran_tax_official`
+- Collection: `iran_tax_official`
 - محصولات: مشاوره AI، بازار مشاوران، لایحه، اظهارنامه، سامانه مودیان
 
-## دامنه‌های آینده (نمونه)
+## دامنه‌های آینده
 
-| Domain ID | مثال محصول |
-|-----------|------------|
-| `iran-legal` | دستیار حقوقی |
-| `iran-accounting` | دستیار حسابداری |
-| `education` | دستیار آموزشی |
-
-افزودن دامنه جدید = محتوای دانش + پرامپت + (اختیاری) adapter؛ **بدون بازنویسی Core**.
-
-## هم‌راستایی با MKA-Core ADR-001
-
-هسته Domain-Agnostic می‌ماند. منطق دامنه فقط در:
-- Prompt Engine / `domains/*/prompts`
-- Knowledge collections
-- Domain Adapters (آینده)
+افزودن دامنه = دانش + APCS Profile + پرامپت؛ بدون بازنویسی Core.

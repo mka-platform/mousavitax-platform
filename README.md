@@ -1,75 +1,42 @@
-# MousaviTax Platform (MKA Holding)
+# MousaviTax Platform (MKA / ARYA Holding)
 
 **هلدینگ پلتفرم دانش‌محور — دامنه اول: مشاوره و خدمات مالیاتی هوشمند ایران**
 
-> هستهٔ Domain-Agnostic (MKA) + Vertical مالیاتی + قابلیت گسترش به حوزه‌های دیگر
+> هسته Domain-Agnostic (MKA) + **APCS Prompt Engine** + Vertical مالیاتی + گسترش به حوزه‌های دیگر
 
-سازمان: [mka-platform](https://github.com/mka-platform)  
-مرجع یکپارچهٔ اهداف **MKA-Core** و **MousaviTax Platform**
+سازمان: [mka-platform](https://github.com/mka-platform)
 
 ---
 
 ## چشم‌انداز هلدینگ
 
-این مخزن **منبع حقیقت واحد** است:
-
 | لایه | نقش |
 |------|------|
-| **Core (MKA)** | RAG، Citation، Parser، Embedding، AI Gateway، API Gateway — مستقل از دامنه |
-| **Vertical: Iran Tax** | دانش رسمی مالیاتی، taxlaw-engine، بازار مشاوران، اظهارنامه، لایحه |
-| **Future Verticals** | حقوقی، حسابداری، پزشکی، آموزش، ... از طریق `domains/` و Prompt/Collection جدا |
+| **Core** | RAG، Citation، Parser، Embedding، AI Gateway، **APCS Engine** |
+| **Vertical: Iran Tax** | دانش رسمی، taxlaw، بازار مشاوران، اظهارنامه، لایحه |
+| **Future Verticals** | حقوقی، حسابداری، Trader، آموزش — فقط Domain Pack جدید |
 
-اصول: Knowledge First · Citation اجباری · Human-in-the-loop · Temporal Validity · Zero Fabrication · Modular & Extensible
+اصول: Knowledge First · Citation · Human-in-the-loop · Temporal Validity · Zero Fabrication · **APCS Traceable Decision**
+
+استاندارد پرامپت: [`docs/standards/APCS-v1.0.md`](docs/standards/APCS-v1.0.md) · [ADR-006](docs/adr/ADR-006-APCS-Prompt-Engine.md)
 
 ---
 
-## ساختار Monorepo
+## ساختار
 
 ```text
-mousavitax-platform/
-├── packages/                 # هسته مشترک (Domain-Agnostic)
-│   ├── shared/               # مدل‌ها و قراردادها (ADR-002)
-│   ├── document-parser/
-│   ├── embedding-service/
-│   ├── retrieval-engine/
-│   ├── ai-gateway/
-│   ├── knowledge-core/       # orchestration دانش
-│   ├── taxlaw-engine/        # موتور لایحه (دامنه مالیات)
-│   └── prompt-engine/
-├── apps/
-│   ├── api/                  # FastAPI – API Gateway
-│   ├── web/                  # Next.js + RTL (بازار + چت)
-│   ├── telegram-bot/         # @taxiran1395_bot
-│   └── admin/
-├── services/
-│   ├── crawler/
-│   ├── google-drive-sync/
-│   └── source-bridge/
-├── domains/
-│   └── iran-tax/             # دانش، پرامپت‌ها، config دامنه مالیات
-├── knowledge/                # مخزن اسناد خام (اختیاری)
-├── docs/                     # Vision, Architecture, ADRs, Roadmap
-├── infra/                    # Docker Compose
-└── scripts/
+packages/
+  shared/ document-parser/ embedding-service/ retrieval-engine/
+  ai-gateway/ prompt-engine/   # APCS Parser + Builder
+  knowledge-core/ taxlaw-engine/
+apps/
+  api/            # FastAPI — /v1/rag/query + /v1/apcs/query
+  telegram-bot/
+  web/ admin/
+domains/
+  iran-tax/       # apcs_profile.yaml + prompts
+docs/standards/   # APCS-v1.0.md
 ```
-
----
-
-## اهداف یکپارچه‌شده
-
-### از MKA-Core
-- هسته ماژولار دانش‌محور
-- RAG + Citation
-- Google Drive Sync، Document Parser، Embedding، Retrieval
-- API Gateway، Telegram Bot، Admin Panel
-- Domain-Agnostic برای گسترش به حوزه‌های دیگر
-
-### از MousaviTax
-- مشاوره هیبریدی (انسان + AI)
-- خدمات عملیاتی: اظهارنامه، لایحه دفاعیه، سامانه مودیان
-- بازار مشاوران (الهام از namatsp)
-- انطباق با قوانین و رویه‌های مالیاتی ایران
-- Temporal Validity روی دانش رسمی
 
 ---
 
@@ -77,44 +44,26 @@ mousavitax-platform/
 
 ```bash
 cp .env.example .env
-# TELEGRAM_BOT_TOKEN، کلید LLM را پر کنید
-
-# API
-cd apps/api && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8000
-
-# ربات (ترمینال جدا)
-cd apps/telegram-bot && pip install -r requirements.txt && python -m app.bot
+cd apps/api && pip install -r requirements.txt \
+  && pip install -r ../../packages/prompt-engine/requirements.txt \
+  && uvicorn app.main:app --reload --port 8000
 ```
 
-یا با Docker:
-
-```bash
-docker compose -f infra/docker-compose.yml up --build
-```
+Endpoints:
+- `GET /health`
+- `POST /v1/rag/query` — پرسش ساده
+- `POST /v1/apcs/query` — دستور APCS کامل
 
 ---
 
 ## وضعیت
 
-- [x] یکپارچه‌سازی چشم‌انداز هلدینگ + ADRها
-- [x] packages: shared, document-parser, embedding, retrieval, ai-gateway
-- [x] apps/api (FastAPI Gateway) + apps/telegram-bot
-- [x] domains/iran-tax (پرامپت و config اولیه)
-- [ ] ایندکس دانش رسمی + pgvector production
-- [ ] apps/web (Next.js RTL MVP)
-- [ ] taxlaw-engine کامل + پنل مشاوران
+- [x] Holding vision + ADR-001…006 (شامل APCS)
+- [x] Core packages + prompt-engine Phase 1
+- [x] API Gateway + Telegram bot + iran-tax profile
+- [ ] Retrieval واقعی روی RAG/APCS
+- [ ] apps/web Next.js RTL
+- [ ] APCS Phase 2–3 (Risk, Verify, Quality Gate)
 
-جزئیات: [`docs/03_ROADMAP.md`](docs/03_ROADMAP.md)
-
----
-
-## پیش‌نیازها
-
-1. توکن ربات `@taxiran1395_bot`
-2. کلید LLM (Ollama / Gemini / OpenAI-compatible)
-3. (اختیاری) Google Service Account برای Drive Sync
-
----
-
-**نگهدارنده:** ziya1346 · **ایمیل:** ziya.mka2026@gmail.com  
-این پلتفرم جایگزین مشاور رسمی یا وکیل نیست.
+**ایمیل:** ziya.mka2026@gmail.com  
+جایگزین مشاور رسمی نیست.

@@ -1,0 +1,60 @@
+/ROLE: Senior Tax Expert
+
+/TASK:
+Analyze the taxpayer's tax assessment.
+
+/OBJECTIVE:
+Determine the strongest legally defensible position.
+
+/CONTEXT:
+Tax Year: 1403
+Assessment Type: Systematic Review
+
+/INPUT:
+Tax return
+Tax assessment
+Audit report
+Financial statements
+
+/EVIDENCE:
+Use only provided documents and verified legal sources.
+
+/RULES:
+Do not invent legal provisions.
+Clearly distinguish facts from assumptions.
+
+/METHOD:
+LEGAL + ACCOUNTING + COMPARATIVE
+
+/MULTI-PERSPECTIVE:
+Taxpayer
+Tax Authority
+Accounting
+Legal
+
+/COMPARE:
+Declared expenses
+vs
+Accepted expenses
+vs
+Rejected expenses
+
+/RISK:
+Identify legal and financial risks.
+
+/PITFALLS:
+Find weaknesses in the taxpayer's argument.
+
+/METRICS:
+Calculate disputed amount
+Calculate tax impact
+Calculate percentage differences
+
+/VERIFY:
+Check calculations and legal references.
+
+/FORMAT:
+STRUCTURED_TAX_REPORT
+
+/SELF-CHECK:
+Check evidence, calculations, assumptions and conclusion.
