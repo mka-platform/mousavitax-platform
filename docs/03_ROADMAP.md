@@ -5,12 +5,13 @@
 - [x] ایجاد سازمان و ریپازیتوری mka-platform/mousavitax-platform
 - [x] تعریف Vision و Website Goals
 - [x] تعریف Architecture اولیه
-- [ ] اسکلت پوشه‌های packages / apps / services
+- [x] اسکلت پوشه‌های packages / apps / services
+- [x] تعریف ADRهای کلیدی (Stack وب، مدل داده دانش، استراتژی انتقال، API، Vector Store)
 - [ ] تنظیم CI پایه و Docker Compose اولیه
 
 ## فاز ۱ — Knowledge & Core AI (اولویت بالا)
 
-- انتقال و یکپارچه‌سازی هسته MKA (Knowledge Manager، RAG، Citation)
+- انتقال و یکپارچه‌سازی هسته MKA (Knowledge Manager، RAG، Citation) — طبق ADR-003
 - اتصال TAXLAW-GROK و ALTIP Layeha Agent به عنوان TaxLaw Engine
 - راه‌اندازی Document Parser و Embedding Service
 - بارگذاری اولیه دانش رسمی (قوانین، بخشنامه‌های کلیدی)
@@ -18,6 +19,7 @@
 
 ## فاز ۲ — وب‌سایت MVP (الهام از namatsp + AI)
 
+- اسکلت apps/web با Next.js 15 + RTL (طبق ADR-001)
 - صفحه اصلی و لندینگ فارسی
 - چت‌بات دانش‌محور با Citation
 - لیست مشاوران و درخواست مشاوره (تلفنی / متنی)
@@ -48,4 +50,4 @@
 
 ---
 
-**اولویت فعلی پیشنهادی:** تکمیل اسکلت monorepo + فاز ۱ (هسته دانش و ربات)
+**اولویت فعلی پیشنهادی:** فاز ۱ — انتقال هسته از MKA-Core به packages/ (طبق ADR-003)
