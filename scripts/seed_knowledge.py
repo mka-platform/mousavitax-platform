@@ -3,7 +3,7 @@
 
 Usage (from repo root):
   export EMBEDDING_PROVIDER=fallback
-  export VECTOR_DB_PATH=data/iran_tax_vectors.json
+  export VECTOR_DB_PATH=$PWD/data/iran_tax_vectors.json
   python scripts/seed_knowledge.py
 """
 
@@ -27,11 +27,11 @@ KNOWLEDGE_DIR = ROOT / "domains" / "iran-tax" / "knowledge"
 
 def main() -> None:
     os.environ.setdefault("EMBEDDING_PROVIDER", "fallback")
-    os.environ.setdefault(
-        "VECTOR_DB_PATH", str(ROOT / "data" / "iran_tax_vectors.json")
-    )
+    db_path = os.environ.get("VECTOR_DB_PATH") or str(ROOT / "data" / "iran_tax_vectors.json")
+    os.environ["VECTOR_DB_PATH"] = db_path
+    Path(db_path).parent.mkdir(parents=True, exist_ok=True)
 
-    ks = KnowledgeService()
+    ks = KnowledgeService(persist_path=db_path)
     parser = DocumentParser(chunk_size=900, chunk_overlap=150)
 
     files = sorted(KNOWLEDGE_DIR.glob("*.md"))
@@ -70,7 +70,8 @@ def main() -> None:
         print(f"Indexed {n:3d} chunks ← {path.name}")
 
     print(f"Done. store_count={ks.count()} total_upserted={total}")
-    print(f"VECTOR_DB_PATH={os.environ['VECTOR_DB_PATH']}")
+    print(f"VECTOR_DB_PATH={db_path}")
+    print("Next: start API with same VECTOR_DB_PATH and GET /v1/knowledge/status")
 
 
 if __name__ == "__main__":
