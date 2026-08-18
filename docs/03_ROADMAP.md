@@ -11,11 +11,12 @@
 
 ## فاز ۱ — Knowledge & Core AI (اولویت بالا)
 
-- انتقال و یکپارچه‌سازی هسته MKA (Knowledge Manager، RAG، Citation) — طبق ADR-003
-- اتصال TAXLAW-GROK و ALTIP Layeha Agent به عنوان TaxLaw Engine
-- راه‌اندازی Document Parser و Embedding Service
-- بارگذاری اولیه دانش رسمی (قوانین، بخشنامه‌های کلیدی)
-- ربات تلگرام MVP با پاسخ مستند
+- [x] انتقال `packages/shared` (مدل‌های ADR-002)
+- [x] انتقال `packages/document-parser`
+- [ ] انتقال retrieval-engine + embedding → knowledge-core
+- [ ] اتصال TAXLAW-GROK و ALTIP به taxlaw-engine
+- [ ] بارگذاری اولیه دانش رسمی (قوانین، بخشنامه‌های کلیدی)
+- [ ] ربات تلگرام MVP با پاسخ مستند
 
 ## فاز ۲ — وب‌سایت MVP (الهام از namatsp + AI)
 
@@ -50,4 +51,4 @@
 
 ---
 
-**اولویت فعلی پیشنهادی:** فاز ۱ — انتقال هسته از MKA-Core به packages/ (طبق ADR-003)
+**اولویت فعلی:** ادامه فاز ۱ — انتقال retrieval-engine و embedding به knowledge-core
