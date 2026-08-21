@@ -2,6 +2,7 @@
 
 ## انجام‌شده
 - Core + APCS + retrieval seed + web skeleton
+- Tax Waiver Engine (packages/taxlaw-engine) + API + صفحه `/waiver`
 - طرح کانال تلگرام/بله، بازار مشاوران، قرارداد، تبلیغات
 - docs/ops دستورالعمل فارسی ماژول‌ها
 

@@ -30,6 +30,7 @@ for sub in (
     "knowledge-core",
     "embedding-service/app",
     "retrieval-engine/app",
+    "taxlaw-engine",
 ):
     sys.path.insert(0, str(PACKAGES / sub))
 
@@ -60,7 +61,7 @@ except ImportError:
 app = FastAPI(
     title="MousaviTax API Gateway",
     description="MKA/ARYA Holding – Iran Tax · APCS + Retrieval",
-    version="0.5.1",
+    version="0.6.0",
     contact={"email": "ziya.mka2026@gmail.com"},
 )
 app.add_middleware(
@@ -97,7 +98,7 @@ class APCSQueryRequest(BaseModel):
 
 @app.get("/health", response_model=HealthResponse)
 async def health():
-    return HealthResponse(version="0.5.1")
+    return HealthResponse(version="0.6.0")
 
 
 @app.get("/v1/knowledge/status")
@@ -229,6 +230,101 @@ async def apcs_query(request: APCSQueryRequest):
         raise HTTPException(status_code=500, detail=f"Internal error: {e}")
 
 
+
+
+# ─── Tax Waiver Engine ───────────────────────────────────────
+try:
+    from taxlaw_engine import (  # noqa: E402
+        CIRCULAR_CONFIG,
+        DOC_CHECKLIST,
+        DEFAULT_PENALTY_TYPES,
+        PenaltyRow,
+        WaiverInput,
+        calculate_waiver,
+        run_smoke_tests,
+        WAIVER_VERSION,
+    )
+except ImportError:
+    calculate_waiver = None  # type: ignore
+    run_smoke_tests = None  # type: ignore
+    CIRCULAR_CONFIG = {}  # type: ignore
+    DOC_CHECKLIST = []  # type: ignore
+    DEFAULT_PENALTY_TYPES = []  # type: ignore
+    WAIVER_VERSION = "unavailable"
+
+
+class PenaltyIn(BaseModel):
+    type: str = "سایر"
+    amount: float = 0
+    waivable: bool = True
+
+
+class WaiverCalcRequest(BaseModel):
+    year: int = 1403
+    appeal_stages: int = 0
+    reduce_debt_30: bool = False
+    after_executive_one_month: bool = False
+    pay_type: str = "پرداخت نقدی"
+    art190_80: bool = False
+    art190_40: bool = False
+    is_production_unit: bool = False
+    special_ok: bool = True
+    pay_date: str = ""
+    penalties: list[PenaltyIn] = Field(default_factory=list)
+    taxpayer_name: Optional[str] = None
+    source: Optional[str] = None
+
+
+@app.get("/v1/tax/waiver/meta")
+async def waiver_meta():
+    if calculate_waiver is None:
+        raise HTTPException(status_code=503, detail="taxlaw-engine not installed")
+    circ = CIRCULAR_CONFIG.get("circulars", {}).get(
+        CIRCULAR_CONFIG.get("activeCircularId", ""), {}
+    )
+    return {
+        "waiver_version": WAIVER_VERSION,
+        "circular": circ,
+        "penalty_types": list(DEFAULT_PENALTY_TYPES),
+        "doc_checklist": list(DOC_CHECKLIST),
+        "human_review_required": True,
+    }
+
+
+@app.post("/v1/tax/waiver/calculate")
+async def waiver_calculate(body: WaiverCalcRequest):
+    if calculate_waiver is None:
+        raise HTTPException(status_code=503, detail="taxlaw-engine not installed")
+    pay_type = body.pay_type if body.pay_type in ("پرداخت نقدی", "ترتیب پرداخت") else "پرداخت نقدی"
+    inp = WaiverInput(
+        year=body.year,
+        appeal_stages=body.appeal_stages,
+        reduce_debt_30=body.reduce_debt_30,
+        after_executive_one_month=body.after_executive_one_month,
+        pay_type=pay_type,  # type: ignore
+        art190_80=body.art190_80,
+        art190_40=body.art190_40,
+        is_production_unit=body.is_production_unit,
+        special_ok=body.special_ok,
+        pay_date=body.pay_date or "",
+        penalties=[
+            PenaltyRow(type=p.type, amount=p.amount, waivable=p.waivable)
+            for p in body.penalties
+        ],
+    )
+    result = calculate_waiver(inp)
+    out = result.to_dict()
+    out["taxpayer_name"] = body.taxpayer_name
+    out["source"] = body.source
+    return out
+
+
+@app.get("/v1/tax/waiver/smoke")
+async def waiver_smoke():
+    if run_smoke_tests is None:
+        raise HTTPException(status_code=503, detail="taxlaw-engine not installed")
+    return {"tests": run_smoke_tests()}
+
 @app.get("/")
 async def root():
     ks = get_knowledge()
@@ -237,11 +333,13 @@ async def root():
         "holding": "MKA / ARYA",
         "domain": "iran-tax",
         "apcs": "v1.0",
-        "version": "0.5.1",
+        "version": "0.6.0",
         "knowledge_chunks": ks.count() if ks else 0,
         "docs": "/docs",
         "rag": "/v1/rag/query",
         "apcs_query": "/v1/apcs/query",
         "knowledge_status": "/v1/knowledge/status",
+        "waiver_calculate": "/v1/tax/waiver/calculate",
+        "waiver_meta": "/v1/tax/waiver/meta",
         "llm_provider": gateway.provider,
     }

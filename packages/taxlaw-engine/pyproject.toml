@@ -1,0 +1,9 @@
+[project]
+name = "taxlaw-engine"
+version = "0.1.0"
+description = "Iran tax law engines – waiver calculator (200/1404/504)"
+requires-python = ">=3.10"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["taxlaw_engine*"]

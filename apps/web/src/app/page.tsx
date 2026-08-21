@@ -22,6 +22,11 @@ export default function HomePage() {
             href: "/chat",
           },
           {
+            title: "بخشودگی جرائم",
+            desc: "محاسبه‌گر پیشنهاد سیستمی بر اساس ۲۰۰/۱۴۰۴/۵۰۴",
+            href: "/waiver",
+          },
+          {
             title: "بازار مشاوران",
             desc: "درخواست مشاوره تلفنی و تخصصی از مشاوران انسانی",
             href: "/advisors",
@@ -41,6 +46,19 @@ export default function HomePage() {
             <p className="text-sm text-slate-400 leading-6">{c.desc}</p>
           </Link>
         ))}
+      </section>
+
+      <section className="rounded-2xl border border-slate-700 bg-[var(--card)] p-5 text-sm leading-7">
+        <h2 className="mb-2 text-base font-semibold">ارتباط با مشاور رسمی مالیاتی</h2>
+        <p className="text-slate-300">
+          در صورت نیاز به مشاوره آنلاین و تهیه لایحه دفاعی منطبق بر قوانین موضوعه کشور
+          می‌توانید با آقای <strong>ضیاءالدین موسوی جراحی</strong> تماس بگیرید.
+        </p>
+        <p className="mt-2">
+          <a className="text-blue-400 hover:underline" href="tel:+989153068322">
+            ۰۹۱۵۳۰۶۸۳۲۲
+          </a>
+        </p>
       </section>
 
       <footer className="text-xs text-slate-500 leading-6">

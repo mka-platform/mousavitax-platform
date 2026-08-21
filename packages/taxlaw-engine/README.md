@@ -1,13 +1,9 @@
 # taxlaw-engine
 
-موتور پژوهش و لایحه‌نویسی حقوقی-مالیاتی مبتنی بر شواهد (برگرفته از TAXLAW-GROK + ALTIP Layeha Agent).
+موتورهای منطق مالیاتی ایران.
 
-## مسئولیت‌ها
-- تحلیل پرونده و ساخت timeline
-- پژوهش قانونی با رعایت Temporal Validity
-- تولید پیش‌نویس لایحه با Citation
-- کنترل کیفیت و adversarial review
-- جلوگیری از جعل منبع
-
-## وضعیت
-اسکلت اولیه — منطق اصلی از TAXLAW-GROK و ALTIP منتقل خواهد شد.
+## بخشودگی جرائم (Tax Waiver)
+- قواعد: دستورالعمل ۲۰۰/۱۴۰۴/۵۰۴ (+ افزایش ویژه ۲۰۰/۱۴۰۶۴/د)
+- API: `POST /v1/tax/waiver/calculate`
+- Web: `/waiver`
+- خروجی همیشه `human_review_required=true`
