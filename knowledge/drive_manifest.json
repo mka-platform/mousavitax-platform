@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "primary_folder_id": "1Jx0cipUqQyGnJk4hFCURzWIg1Abo1Del",
+  "fallback_folder_id": "1NcBkZOTemmVfnNKY7FgxuqbIXj6f4Dtl",
+  "registry_folder_id": "1LmVU0WnD_-qlzs8Upv2HkpI-dYrUfkqg",
+  "notes": "Put exported PDFs under knowledge/official or run sync_drive_knowledge.py with service account. File IDs can be listed under files[] for gdown.",
+  "files": []
+}

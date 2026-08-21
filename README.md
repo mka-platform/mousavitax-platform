@@ -48,3 +48,19 @@ npm run dev
 ضیاءالدین موسوی جراحی — ۰۹۱۵۳۰۶۸۳۲۲
 
 ایمیل مدیر: ziya.mka2026@gmail.com
+
+
+## دانش و ایندکس
+
+```bash
+# 1) اختیاری — همگام Drive (Service Account)
+export GOOGLE_SERVICE_ACCOUNT_JSON=/path/to/sa.json
+python scripts/sync_drive_knowledge.py
+
+# 2) یا کپی دستی PDF رسمی در knowledge/official/
+
+# 3) ایندکس
+export EMBEDDING_PROVIDER=fallback   # یا ollama
+export VECTOR_DB_PATH=$PWD/data/iran_tax_vectors.json
+python scripts/seed_knowledge.py
+```

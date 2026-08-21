@@ -1,14 +1,8 @@
 # scripts
 
-## seed_knowledge.py
+| اسکریپت | کار |
+|---------|-----|
+| `sync_drive_knowledge.py` | دانلود از Google Drive → `knowledge/drive_mirror/` |
+| `seed_knowledge.py` | ایندکس MD/PDF/DOCX → `data/iran_tax_vectors.json` |
 
-ایندکس اسناد نمونه `domains/iran-tax/knowledge/*.md` در vector store.
-
-```bash
-cd /path/to/mousavitax-platform
-export EMBEDDING_PROVIDER=fallback
-export VECTOR_DB_PATH=$PWD/data/iran_tax_vectors.json
-python scripts/seed_knowledge.py
-```
-
-سپس API را با همان `VECTOR_DB_PATH` اجرا کنید تا Citation واقعی برگردد.
+ترتیب پیشنهادی: sync (اختیاری) → seed → اجرای API.
