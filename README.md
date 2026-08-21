@@ -17,6 +17,16 @@ templates/contracts/
 docs/ops/
 ```
 
+## Windows (ساده)
+
+```bat
+scripts\win-setup.bat
+scripts\win-run-api.bat
+scripts\win-run-web.bat
+```
+
+راهنما: `scripts/WINDOWS.md`
+
 ## اجرای سریع API
 
 ```bash
