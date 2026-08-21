@@ -1,28 +1,15 @@
-# Holding Vision — MKA / ARYA / MousaviTax
+# چشم‌انداز هلدینگ MKA / MousaviTax AI
 
-## مدل هلدینگ
+## هویت محصول (به‌روز پس از Benchmark نما)
 
-1. **Core (MKA)** — RAG، Citation، Parser، Embedding، AI Gateway، **APCS Prompt Engine**
-2. **Vertical / Domain Pack** — هر حوزه یک pack:
-   - knowledge collection
-   - `apcs_profile.yaml` + prompts
-   - اختیاری: Domain Adapter
-3. **محصولات** — Web، Telegram، API، Admin
+**AI Tax Platform** برای ایران:
+- Service-Based و Case-Based
+- AI Tax Triage + RAG/APCS با Citation
+- Expert Marketplace با Human-in-the-loop
+- نه کلون Marketplace خالص؛ نه چت‌بات تنها
 
-## APCS
+## لایه‌ها
+User/Taxpayer · Expert · Admin · Tax Case Engine · Document AI · Tax AI (APCS) · Workflow · Tax Knowledge (رسمی) · Human Review · Final Opinion
 
-استاندارد مادر پرامپت: **APCS v1.0** (`docs/standards/APCS-v1.0.md`, ADR-006).
-
-```
-APCS Core + Tax Profile + Knowledge Profile + (آینده) Trader / Legal / ...
-```
-
-## دامنه فعلی: Iran Tax
-
-- مسیر: `domains/iran-tax/`
-- Collection: `iran_tax_official`
-- محصولات: مشاوره AI، بازار مشاوران، لایحه، اظهارنامه، سامانه مودیان
-
-## دامنه‌های آینده
-
-افزودن دامنه = دانش + APCS Profile + پرامپت؛ بدون بازنویسی Core.
+## اصول
+Knowledge First · Citation · Zero Fabrication · Temporal Validity · Human-in-the-loop · RBAC/Audit · Freemium→Expert tiers
