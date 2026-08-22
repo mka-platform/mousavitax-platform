@@ -3,19 +3,52 @@
 @tailwind utilities;
 
 :root {
-  --background: #0b1220;
-  --foreground: #e8eef7;
-  --card: #121a2b;
-  --accent: #3b82f6;
+  --bg: #070b14;
+  --bg2: #0c1220;
+  --card: #121a2c;
+  --card-hover: #182235;
+  --border: #1e2a42;
+  --text: #eef3fb;
   --muted: #94a3b8;
+  --accent: #2563eb;
+  --accent2: #38bdf8;
+  --gold: #d4a017;
+  --success: #22c55e;
+  --warn: #f59e0b;
 }
 
 html {
   direction: rtl;
+  scroll-behavior: smooth;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: var(--text);
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(37, 99, 235, 0.18), transparent 55%),
+    radial-gradient(900px 500px at 0% 20%, rgba(56, 189, 248, 0.08), transparent 50%),
+    var(--bg);
   font-family: Vazirmatn, Tahoma, Arial, sans-serif;
+  min-height: 100vh;
+}
+
+.card {
+  @apply rounded-2xl border border-slate-700/80 bg-[#121a2c]/80 backdrop-blur-sm shadow-lg shadow-black/20;
+}
+
+.card:hover {
+  border-color: rgba(59, 130, 246, 0.45);
+  background: #182235;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-500 active:scale-[0.98];
+}
+
+.btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-600 px-5 py-3 text-sm font-medium text-slate-200 transition hover:border-blue-500 hover:text-white;
+}
+
+.badge {
+  @apply inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-300;
 }

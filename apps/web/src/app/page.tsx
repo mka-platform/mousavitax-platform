@@ -1,70 +1,148 @@
 import Link from "next/link";
 
+const services = [
+  {
+    title: "محاسبه‌گر بخشودگی جرائم",
+    desc: "پیشنهاد سیستمی بر اساس دستورالعمل ۲۰۰/۱۴۰۴/۵۰۴ با تأیید انسان",
+    href: "/waiver",
+    tag: "ابزار عملیاتی",
+    icon: "٪",
+  },
+  {
+    title: "مشاور هوشمند AI",
+    desc: "پرسش مالیاتی با RAG و Citation از منابع رسمی",
+    href: "/chat",
+    tag: "دانش‌محور",
+    icon: "AI",
+  },
+  {
+    title: "خدمات تخصصی",
+    desc: "اظهارنامه، لایحه دفاعی، سامانه مودیان، ارزش افزوده",
+    href: "/services",
+    tag: "خدمات",
+    icon: "§",
+  },
+  {
+    title: "بازار مشاوران",
+    desc: "اتصال به مشاور انسانی تأییدشده برای پرونده‌های حساس",
+    href: "/advisors",
+    tag: "انسان در حلقه",
+    icon: "◎",
+  },
+];
+
+const trust = [
+  { t: "استناد اجباری", d: "هر پاسخ با منبع قابل پیگیری" },
+  { t: "قوانین رسمی", d: "اولویت منابع سازمان امور مالیاتی" },
+  { t: "نظارت انسان", d: "تصمیم نهایی با مشاور مجاز" },
+  { t: "حریم خصوصی", d: "جداسازی داده عمومی و پرونده" },
+];
+
 export default function HomePage() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-5xl flex-col gap-10 px-4 py-12">
-      <header className="space-y-3">
-        <p className="text-sm text-blue-400">MKA / ARYA Holding · APCS v1.0</p>
-        <h1 className="text-3xl font-bold leading-relaxed md:text-4xl">
-          MousaviTax Platform
-        </h1>
-        <p className="max-w-2xl text-slate-300 leading-8">
-          پلتفرم مشاوره و خدمات مالیاتی هوشمند ایران — ترکیب دانش رسمی، Citation
-          اجباری، و مشاور انسانی.
-        </p>
-      </header>
+    <main>
+      {/* Hero */}
+      <section className="relative overflow-hidden">
+        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-2 md:items-center md:py-20">
+          <div className="space-y-6">
+            <span className="badge">پلتفرم مالیات هوشمند ایران · MKA</span>
+            <h1 className="text-3xl font-extrabold leading-[1.6] md:text-5xl">
+              مشاوره مالیاتی
+              <span className="block bg-gradient-to-l from-blue-400 to-sky-300 bg-clip-text text-transparent">
+                دقیق، مستند، قابل دفاع
+              </span>
+            </h1>
+            <p className="max-w-xl text-base leading-8 text-slate-300 md:text-lg">
+              ترکیب دانش رسمی، موتور بخشودگی جرائم، و مشاور انسانی — برای مودی،
+              حسابدار و تیم حقوقی که به استناد و نتیجه عملی نیاز دارند.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/waiver" className="btn-primary">
+                شروع محاسبه بخشودگی
+              </Link>
+              <Link href="/chat" className="btn-ghost">
+                پرسش از مشاور AI
+              </Link>
+              <a href="tel:+989153068322" className="btn-ghost">
+                تماس با مشاور رسمی
+              </a>
+            </div>
+            <p className="text-xs text-slate-500">
+              خروجی سیستمی پیشنهاد است و جایگزین رأی سازمان یا مشاور رسمی نیست.
+            </p>
+          </div>
 
-      <section className="grid gap-4 md:grid-cols-3">
-        {[
-          {
-            title: "چت مشاور AI",
-            desc: "پرسش مالیاتی با استناد به منابع (RAG + APCS)",
-            href: "/chat",
-          },
-          {
-            title: "بخشودگی جرائم",
-            desc: "محاسبه‌گر پیشنهاد سیستمی بر اساس ۲۰۰/۱۴۰۴/۵۰۴",
-            href: "/waiver",
-          },
-          {
-            title: "بازار مشاوران",
-            desc: "درخواست مشاوره تلفنی و تخصصی از مشاوران انسانی",
-            href: "/advisors",
-          },
-          {
-            title: "خدمات عملیاتی",
-            desc: "اظهارنامه، لایحه دفاعیه، سامانه مودیان",
-            href: "/services",
-          },
-        ].map((c) => (
-          <Link
-            key={c.href}
-            href={c.href}
-            className="rounded-2xl border border-slate-700 bg-[var(--card)] p-5 transition hover:border-blue-500"
-          >
-            <h2 className="mb-2 text-lg font-semibold">{c.title}</h2>
-            <p className="text-sm text-slate-400 leading-6">{c.desc}</p>
-          </Link>
-        ))}
+          <div className="card relative p-6 md:p-8">
+            <div className="mb-4 text-xs font-medium text-blue-300">چرا MousaviTax؟</div>
+            <ul className="space-y-4">
+              {trust.map((x) => (
+                <li key={x.t} className="flex gap-3">
+                  <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600/20 text-xs text-blue-300">
+                    ✓
+                  </span>
+                  <div>
+                    <div className="font-semibold text-slate-100">{x.t}</div>
+                    <div className="text-sm text-slate-400">{x.d}</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-6 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm leading-7 text-amber-100">
+              <strong>ضیاءالدین موسوی جراحی</strong> — مشاور رسمی مالیاتی
+              <br />
+              لایحه دفاعی و مشاوره آنلاین:{" "}
+              <a className="underline" href="tel:+989153068322">
+                ۰۹۱۵۳۰۶۸۳۲۲
+              </a>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-700 bg-[var(--card)] p-5 text-sm leading-7">
-        <h2 className="mb-2 text-base font-semibold">ارتباط با مشاور رسمی مالیاتی</h2>
-        <p className="text-slate-300">
-          در صورت نیاز به مشاوره آنلاین و تهیه لایحه دفاعی منطبق بر قوانین موضوعه کشور
-          می‌توانید با آقای <strong>ضیاءالدین موسوی جراحی</strong> تماس بگیرید.
-        </p>
-        <p className="mt-2">
-          <a className="text-blue-400 hover:underline" href="tel:+989153068322">
-            ۰۹۱۵۳۰۶۸۳۲۲
-          </a>
-        </p>
+      {/* Services grid */}
+      <section className="mx-auto max-w-6xl px-4 pb-8">
+        <div className="mb-6 flex items-end justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-bold md:text-2xl">خدمات و ابزارها</h2>
+            <p className="mt-1 text-sm text-slate-400">طراحی‌شده برای تصمیم‌گیری سریع و مستند</p>
+          </div>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {services.map((s) => (
+            <Link key={s.href} href={s.href} className="card group flex flex-col p-5 transition">
+              <div className="mb-3 flex items-center justify-between">
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600/15 text-sm font-bold text-blue-300">
+                  {s.icon}
+                </span>
+                <span className="text-[10px] text-slate-500">{s.tag}</span>
+              </div>
+              <h3 className="mb-2 font-semibold group-hover:text-blue-300">{s.title}</h3>
+              <p className="flex-1 text-sm leading-6 text-slate-400">{s.desc}</p>
+              <span className="mt-4 text-xs text-blue-400">ورود ←</span>
+            </Link>
+          ))}
+        </div>
       </section>
 
-      <footer className="text-xs text-slate-500 leading-6">
-        این سامانه جایگزین مشاور رسمی مالیاتی یا وکیل نیست. تصمیم نهایی با مودی و
-        مشاور مجاز است.
-      </footer>
+      {/* CTA band */}
+      <section className="mx-auto max-w-6xl px-4 py-10">
+        <div className="card flex flex-col items-start justify-between gap-6 bg-gradient-to-l from-blue-950/50 to-slate-900/40 p-8 md:flex-row md:items-center">
+          <div>
+            <h2 className="text-xl font-bold">آماده بررسی پرونده یا جرائم خود هستید؟</h2>
+            <p className="mt-2 max-w-xl text-sm leading-7 text-slate-300">
+              از محاسبه‌گر بخشودگی شروع کنید یا مستقیم با مشاور رسمی هماهنگ شوید.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/waiver" className="btn-primary">
+              محاسبه بخشودگی
+            </Link>
+            <a href="tel:+989153068322" className="btn-ghost">
+              ۰۹۱۵۳۰۶۸۳۲۲
+            </a>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

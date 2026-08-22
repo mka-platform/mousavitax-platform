@@ -98,18 +98,21 @@ export default function WaiverPage() {
 
   return (
     <main className="mx-auto max-w-3xl space-y-6 px-4 py-10 text-slate-100" dir="rtl">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold">محاسبه‌گر بخشودگی جرائم</h1>
-        <Link href="/" className="text-sm text-blue-400 hover:underline">
-          بازگشت
-        </Link>
+      <div className="space-y-2">
+        <p className="text-xs font-medium text-blue-400">ابزار عملیاتی · دستورالعمل ۲۰۰/۱۴۰۴/۵۰۴</p>
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="text-2xl font-extrabold md:text-3xl">محاسبه‌گر بخشودگی جرائم</h1>
+          <Link href="/" className="text-sm text-slate-400 hover:text-blue-400">
+            خانه
+          </Link>
+        </div>
+        <p className="text-sm leading-7 text-slate-400">
+          پیشنهاد سیستمی برای بررسی مشاور — با درصد پایه، کسور دادرسی، ماده ۱۹۰ و افزایش ویژه.
+        </p>
       </div>
-      <p className="text-sm text-slate-400">
-        قواعد: دستورالعمل ۲۰۰/۱۴۰۴/۵۰۴ — خروجی پیشنهاد سیستمی است.
-      </p>
-      <div className="rounded-xl border border-amber-600/50 bg-amber-950/40 p-4 text-sm text-amber-100">
-        HUMAN_REVIEW_REQUIRED — این محاسبه جایگزین رأی سازمان امور مالیاتی یا مشاور
-        رسمی نیست و باید توسط انسان بررسی شود.
+      <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm leading-7 text-amber-100">
+        <strong>HUMAN_REVIEW_REQUIRED</strong> — این محاسبه جایگزین رأی سازمان امور مالیاتی
+        یا مشاور رسمی نیست و باید توسط انسان تأیید شود.
       </div>
 
       <section className="space-y-3 rounded-2xl border border-slate-700 bg-[var(--card)] p-5">

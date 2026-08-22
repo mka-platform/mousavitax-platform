@@ -1,12 +1,17 @@
-export default function ServicesPage() {
+import Link from "next/link";
+
+export default function Page() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10">
-      <h1 className="mb-4 text-2xl font-bold">خدمات عملیاتی</h1>
-      <ul className="list-disc space-y-2 pr-5 text-slate-300 leading-8">
-        <li>تنظیم اظهارنامه (راهنما + نیمه‌خودکار)</li>
-        <li>پیش‌نویس لایحه دفاعیه با کنترل انسانی</li>
-        <li>راهنمای سامانه مودیان</li>
-      </ul>
+    <main className="mx-auto max-w-3xl space-y-6 px-4 py-12" dir="rtl">
+      <p className="text-xs text-blue-400">MousaviTax · MKA</p>
+      <h1 className="text-2xl font-extrabold md:text-3xl">خدمات عملیاتی</h1>
+      <p className="leading-8 text-slate-300">اظهارنامه، لایحه دفاعی، سامانه مودیان و پیگیری پرونده — با هماهنگی مشاور رسمی.</p>
+      <div className="card space-y-3 p-6 text-sm text-slate-300">
+        <p>برای اقدام فوری با مشاور رسمی تماس بگیرید:</p>
+        <a className="btn-primary inline-flex" href="tel:+989153068322">۰۹۱۵۳۰۶۸۳۲۲</a>
+        <p className="text-xs text-slate-500">ضیاءالدین موسوی جراحی — مشاور رسمی مالیاتی</p>
+      </div>
+      <Link href="/" className="text-sm text-blue-400">بازگشت به خانه</Link>
     </main>
   );
 }
