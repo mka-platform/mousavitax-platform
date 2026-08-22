@@ -35,7 +35,7 @@ os.environ.setdefault("EMBEDDING_PROVIDER", "fallback")
 
 app = FastAPI(
     title="MousaviTax API Gateway",
-    version="0.3.2",
+    version="0.3.3",
     description="MKA / ARYA – Iran Tax API (waiver + RAG)",
 )
 
@@ -102,7 +102,7 @@ async def health():
     return {
         "status": "ok",
         "service": "mousavitax-api",
-        "version": "0.3.2",
+        "version": "0.3.3",
         "knowledge_chunks": ks.count() if ks else 0,
     }
 
@@ -193,10 +193,51 @@ async def waiver_calculate(body: WaiverCalcRequest):
     )
     result = calculate_waiver(inp)
     out = result.to_dict() if hasattr(result, "to_dict") else result
-    if isinstance(out, dict):
-        out["taxpayer_name"] = body.taxpayer_name
-        out["source"] = body.source
+    if not isinstance(out, dict):
+        out = {"result": out}
+    out["taxpayer_name"] = body.taxpayer_name
+    out["source"] = body.source
+    out["human_review_required"] = True
+
+    # Stage 3: persist calculation log for human review
+    import json
+    from datetime import datetime, timezone
+
+    log_path = ROOT / "data" / "waiver_calculations.jsonl"
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    log_id = f"wav-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
+    log_rec = {
+        "id": log_id,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "status": "pending_human_review",
+        "inputs": body.model_dump(),
+        "outputs": {k: out[k] for k in out if k not in ("disclaimer",)},
+    }
+    with log_path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(log_rec, ensure_ascii=False) + "\n")
+    out["log_id"] = log_id
     return out
+
+
+
+
+@app.get("/v1/tax/waiver/logs")
+async def waiver_logs(limit: int = 50):
+    """MVP list for manager review — protect with auth later."""
+    import json
+
+    log_path = ROOT / "data" / "waiver_calculations.jsonl"
+    if not log_path.exists():
+        return {"items": [], "count": 0}
+    lines = log_path.read_text(encoding="utf-8").strip().splitlines()
+    items = []
+    for line in lines[-max(1, min(limit, 200)):]:
+        try:
+            items.append(json.loads(line))
+        except Exception:
+            continue
+    items.reverse()
+    return {"items": items, "count": len(items)}
 
 
 @app.get("/v1/tax/waiver/smoke")
@@ -461,12 +502,13 @@ async def root():
     ks = get_knowledge()
     return {
         "service": "MousaviTax API Gateway",
-        "version": "0.3.2",
+        "version": "0.3.3",
         "health": "/health",
         "docs": "/docs",
         "knowledge_status": "/v1/knowledge/status",
         "rag": "POST /v1/rag/query",
         "waiver_calculate": "POST /v1/tax/waiver/calculate",
+        "waiver_logs": "GET /v1/tax/waiver/logs",
         "advisor_request": "POST /v1/advisors/request",
         "careers_apply": "POST /v1/careers/apply",
         "knowledge_chunks": ks.count() if ks else 0,

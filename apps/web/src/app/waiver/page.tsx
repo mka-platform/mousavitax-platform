@@ -234,6 +234,11 @@ export default function WaiverPage() {
           <p className="text-xs text-slate-400">
             {String(result.circular_id)} · {String(result.rule_version)}
           </p>
+          {result.log_id ? (
+            <p className="text-xs text-blue-300">
+              کد لاگ بررسی انسانی: {String(result.log_id)} · status: pending_human_review
+            </p>
+          ) : null}
           <p className="text-xs text-amber-200">{String(result.disclaimer)}</p>
         </section>
       )}

@@ -24,3 +24,4 @@ credentials*.json
 data/advisor_requests.jsonl
 data/*.jsonl
 data/career_applications.jsonl
+data/waiver_calculations.jsonl
