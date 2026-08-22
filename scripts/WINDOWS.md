@@ -45,3 +45,15 @@ set EMBEDDING_PROVIDER=fallback
 set VECTOR_DB_PATH=%CD%\data\iran_tax_vectors.json
 python scripts\seed_knowledge.py
 ```
+
+
+## خطای Could not import module app.main
+
+علت رایج: قرار گرفتن `packages/document-parser` در PYTHONPATH (بستهٔ داخلی‌اش هم نام `app` دارد).
+
+اسکریپت `win-run-api.bat` اصلاح شده است. پس از `git pull` دوباره اجرا کنید.
+
+بدون reload:
+```bat
+scripts\win-run-api-noreload.bat
+```
