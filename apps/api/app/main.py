@@ -35,7 +35,7 @@ os.environ.setdefault("EMBEDDING_PROVIDER", "fallback")
 
 app = FastAPI(
     title="MousaviTax API Gateway",
-    version="0.3.1",
+    version="0.3.2",
     description="MKA / ARYA – Iran Tax API (waiver + RAG)",
 )
 
@@ -102,7 +102,7 @@ async def health():
     return {
         "status": "ok",
         "service": "mousavitax-api",
-        "version": "0.3.1",
+        "version": "0.3.2",
         "knowledge_chunks": ks.count() if ks else 0,
     }
 
@@ -337,10 +337,16 @@ class AdvisorRequestIn(BaseModel):
     full_name: str = Field(..., min_length=2, max_length=120)
     mobile: str = Field(..., min_length=10, max_length=20)
     city: str = Field(default="", max_length=80)
-    topic: str = Field(..., min_length=2, max_length=200)
+    topic: str = Field(default="مشاوره عمومی", max_length=200)
     details: str = Field(default="", max_length=4000)
     preferred_time: str = Field(default="", max_length=120)
-    role: str = Field(default="مودی", max_length=40)  # مودی | مشاور
+    role: str = Field(default="مودی", max_length=80)
+    professional_title: str = Field(default="", max_length=120)
+    license_number: str = Field(default="", max_length=80)
+    document_type: str = Field(default="", max_length=120)
+    document_reference: str = Field(default="", max_length=120)
+    organization: str = Field(default="", max_length=160)
+    credentials_submitted: bool = False
 
 
 @app.post("/v1/advisors/request")
@@ -358,10 +364,19 @@ async def advisor_request(body: AdvisorRequestIn):
     }
     with ADVISOR_STORE.open("a", encoding="utf-8") as f:
         f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    vstatus = "pending_verification" if body.credentials_submitted else "n/a"
+    if body.credentials_submitted:
+        rec["verification_status"] = "pending_verification"
+        rec["status"] = "pending_credential_review"
     return {
         "ok": True,
         "id": rec["id"],
-        "message": "درخواست ثبت شد. مشاور انسانی به‌زودی بررسی می‌کند.",
+        "message": (
+            "مدارک برای اعتبارسنجی انسانی ثبت شد."
+            if body.credentials_submitted
+            else "درخواست مشاوره ثبت شد. تیم انسانی بررسی می‌کند."
+        ),
+        "verification_status": vstatus,
         "contact_hint": "۰۹۱۵۳۰۶۸۳۲۲",
     }
 
@@ -384,18 +399,76 @@ async def list_advisor_requests(limit: int = 50):
     return {"items": items, "count": len(items)}
 
 
+
+
+# ── Careers / hiring ─────────────────────────────────────────
+CAREERS_STORE = ROOT / "data" / "career_applications.jsonl"
+
+
+class CareerApplyIn(BaseModel):
+    full_name: str = Field(..., min_length=2, max_length=120)
+    mobile: str = Field(..., min_length=10, max_length=20)
+    email: str = Field(default="", max_length=120)
+    city: str = Field(default="", max_length=80)
+    desired_role: str = Field(..., max_length=120)
+    experience_years: float = 0
+    education: str = Field(default="", max_length=200)
+    resume_summary: str = Field(..., min_length=10, max_length=8000)
+    availability: str = Field(default="تمام‌وقت", max_length=40)
+
+
+@app.post("/v1/careers/apply")
+async def careers_apply(body: CareerApplyIn):
+    import json
+    from datetime import datetime, timezone
+
+    CAREERS_STORE.parent.mkdir(parents=True, exist_ok=True)
+    rec = {
+        "id": f"job-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "status": "new",
+        "human_review_required": True,
+        **body.model_dump(),
+    }
+    with CAREERS_STORE.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    return {
+        "ok": True,
+        "id": rec["id"],
+        "message": "درخواست استخدام ثبت شد و توسط مدیریت بررسی می‌شود.",
+    }
+
+
+@app.get("/v1/careers/applications")
+async def list_career_applications(limit: int = 50):
+    import json
+
+    if not CAREERS_STORE.exists():
+        return {"items": [], "count": 0}
+    lines = CAREERS_STORE.read_text(encoding="utf-8").strip().splitlines()
+    items = []
+    for line in lines[-max(1, min(limit, 200)):]:
+        try:
+            items.append(json.loads(line))
+        except Exception:
+            continue
+    items.reverse()
+    return {"items": items, "count": len(items)}
+
+
 @app.get("/")
 async def root():
     ks = get_knowledge()
     return {
         "service": "MousaviTax API Gateway",
-        "version": "0.3.1",
+        "version": "0.3.2",
         "health": "/health",
         "docs": "/docs",
         "knowledge_status": "/v1/knowledge/status",
         "rag": "POST /v1/rag/query",
         "waiver_calculate": "POST /v1/tax/waiver/calculate",
         "advisor_request": "POST /v1/advisors/request",
+        "careers_apply": "POST /v1/careers/apply",
         "knowledge_chunks": ks.count() if ks else 0,
         "note": "Web UI on Next.js :3000",
     }

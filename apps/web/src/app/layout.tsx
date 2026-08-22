@@ -13,7 +13,8 @@ const nav = [
   { href: "/waiver", label: "بخشودگی جرائم" },
   { href: "/chat", label: "مشاور AI" },
   { href: "/services", label: "خدمات" },
-  { href: "/advisors", label: "مشاوران" },
+  { href: "/advisors", label: "ارتباط با مشاورین" },
+  { href: "/careers", label: "استخدام" },
 ];
 
 export default function RootLayout({
