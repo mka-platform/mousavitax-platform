@@ -20,3 +20,6 @@ credentials*.json
 
 # OS
 .DS_Store
+
+data/advisor_requests.jsonl
+data/*.jsonl

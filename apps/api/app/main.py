@@ -35,7 +35,7 @@ os.environ.setdefault("EMBEDDING_PROVIDER", "fallback")
 
 app = FastAPI(
     title="MousaviTax API Gateway",
-    version="0.3.0",
+    version="0.3.1",
     description="MKA / ARYA – Iran Tax API (waiver + RAG)",
 )
 
@@ -102,7 +102,7 @@ async def health():
     return {
         "status": "ok",
         "service": "mousavitax-api",
-        "version": "0.3.0",
+        "version": "0.3.1",
         "knowledge_chunks": ks.count() if ks else 0,
     }
 
@@ -327,17 +327,75 @@ async def rag_query(body: RAGRequest):
     }
 
 
+
+
+# ── Advisor marketplace requests ─────────────────────────────
+ADVISOR_STORE = ROOT / "data" / "advisor_requests.jsonl"
+
+
+class AdvisorRequestIn(BaseModel):
+    full_name: str = Field(..., min_length=2, max_length=120)
+    mobile: str = Field(..., min_length=10, max_length=20)
+    city: str = Field(default="", max_length=80)
+    topic: str = Field(..., min_length=2, max_length=200)
+    details: str = Field(default="", max_length=4000)
+    preferred_time: str = Field(default="", max_length=120)
+    role: str = Field(default="مودی", max_length=40)  # مودی | مشاور
+
+
+@app.post("/v1/advisors/request")
+async def advisor_request(body: AdvisorRequestIn):
+    import json
+    from datetime import datetime, timezone
+
+    ADVISOR_STORE.parent.mkdir(parents=True, exist_ok=True)
+    rec = {
+        "id": f"adv-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "status": "new",
+        "human_review_required": True,
+        **body.model_dump(),
+    }
+    with ADVISOR_STORE.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    return {
+        "ok": True,
+        "id": rec["id"],
+        "message": "درخواست ثبت شد. مشاور انسانی به‌زودی بررسی می‌کند.",
+        "contact_hint": "۰۹۱۵۳۰۶۸۳۲۲",
+    }
+
+
+@app.get("/v1/advisors/requests")
+async def list_advisor_requests(limit: int = 50):
+    """MVP: لیست خام برای مدیر — بعداً با احراز هویت محدود شود."""
+    import json
+
+    if not ADVISOR_STORE.exists():
+        return {"items": [], "count": 0}
+    lines = ADVISOR_STORE.read_text(encoding="utf-8").strip().splitlines()
+    items = []
+    for line in lines[-max(1, min(limit, 200)) :]:
+        try:
+            items.append(json.loads(line))
+        except Exception:
+            continue
+    items.reverse()
+    return {"items": items, "count": len(items)}
+
+
 @app.get("/")
 async def root():
     ks = get_knowledge()
     return {
         "service": "MousaviTax API Gateway",
-        "version": "0.3.0",
+        "version": "0.3.1",
         "health": "/health",
         "docs": "/docs",
         "knowledge_status": "/v1/knowledge/status",
         "rag": "POST /v1/rag/query",
         "waiver_calculate": "POST /v1/tax/waiver/calculate",
+        "advisor_request": "POST /v1/advisors/request",
         "knowledge_chunks": ks.count() if ks else 0,
         "note": "Web UI on Next.js :3000",
     }
