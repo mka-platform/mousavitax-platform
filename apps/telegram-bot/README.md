@@ -1,13 +1,20 @@
-# apps/telegram-bot
+# Telegram Bot — @taxiran1395_bot
 
-آداپتر نازک برای تلگرام (`@taxiran1395_bot` یا ربات جایگزین).
+Adapter نازک روی API Gateway (RAG).
 
-- فقط پروتکل تلگرام را ترجمه می‌کند
-- منطق دانش/APCS در `apps/api` است
-- هم‌تراز با `apps/bale-bot` (همان Backend)
+## اجرا (Windows)
 
-```bash
-export TELEGRAM_BOT_TOKEN=...
-export BACKEND_URL=http://localhost:8000
-python -m app.bot
+1. API روی `127.0.0.1:8000` روشن باشد.
+2. توکن را تنظیم کنید:
+
+```bat
+set TELEGRAM_BOT_TOKEN=...
+set BACKEND_URL=http://127.0.0.1:8000
+set WEB_PUBLIC_URL=http://localhost:3001
+scripts\win-run-telegram.bat
 ```
+
+## دستورات
+/start /help /status /contact /jobs /web + پیام آزاد → `/v1/rag/query`
+
+بخشودگی جرائم فقط روی وب `/waiver` است.
