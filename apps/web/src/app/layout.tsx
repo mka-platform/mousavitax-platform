@@ -15,6 +15,7 @@ const nav = [
   { href: "/services", label: "خدمات" },
   { href: "/advisors", label: "ارتباط با مشاورین" },
   { href: "/careers", label: "استخدام" },
+  { href: "/admin", label: "پنل مدیر" },
 ];
 
 export default function RootLayout({
