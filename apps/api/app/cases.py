@@ -1,22 +1,41 @@
-"""Tax Case + Service Request + Triage routes (jsonl MVP store)."""
+"""Tax Case + Service Request + Triage + Document upload (jsonl MVP)."""
 
 from __future__ import annotations
 
 import json
 import re
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 
 router = APIRouter(tags=["cases-services"])
 
-# ROOT = monorepo root (apps/api/app -> parents[3])
 ROOT = Path(__file__).resolve().parents[3]
 CASE_STORE = ROOT / "data" / "tax_cases.jsonl"
 SERVICE_STORE = ROOT / "data" / "service_requests.jsonl"
+DOC_STORE = ROOT / "data" / "case_documents.jsonl"
+UPLOAD_ROOT = ROOT / "data" / "case_uploads"
+
+MAX_UPLOAD_BYTES = 15 * 1024 * 1024  # 15 MB
+ALLOWED_EXT = {
+    ".pdf",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".webp",
+    ".gif",
+    ".doc",
+    ".docx",
+    ".xls",
+    ".xlsx",
+    ".txt",
+    ".md",
+    ".csv",
+}
 
 SERVICE_CATALOG: list[dict[str, str]] = [
     {"code": "S01", "title": "سؤال سریع مالیاتی", "path": "AI + RAG"},
@@ -77,13 +96,20 @@ def _read_jsonl(path: Path, limit: int = 50) -> list[dict]:
         return []
     lines = path.read_text(encoding="utf-8").strip().splitlines()
     items: list[dict] = []
-    for line in lines[-max(1, min(limit, 200)) :]:
+    for line in lines[-max(1, min(limit, 500)) :]:
         try:
             items.append(json.loads(line))
         except Exception:
             continue
     items.reverse()
     return items
+
+
+def _find_case(case_id: str) -> Optional[dict]:
+    for it in _read_jsonl(CASE_STORE, limit=500):
+        if it.get("id") == case_id:
+            return it
+    return None
 
 
 def _title_for(code: str) -> str:
@@ -93,10 +119,14 @@ def _title_for(code: str) -> str:
     return code
 
 
+def _safe_filename(name: str) -> str:
+    base = Path(name or "file").name
+    base = re.sub(r"[^\w.\-\u0600-\u06FF]+", "_", base, flags=re.UNICODE)
+    return base[:180] or "file"
+
+
 def triage_text(query: str, service_code: Optional[str] = None) -> dict[str, Any]:
     q = (query or "").strip()
-    low = q.lower()
-    # Persian keywords — check original
     if any(k in q for k in COMPLEX_KEYWORDS) or service_code in {
         "S03",
         "S04",
@@ -129,7 +159,6 @@ def triage_text(query: str, service_code: Optional[str] = None) -> dict[str, Any
         human = False
         rec = service_code or "S01"
 
-    # Long unstructured text → bump complexity
     if len(q) > 800 and level == "simple":
         level = "medium"
         reason = "متن طولانی — کنترل کیفیت"
@@ -218,23 +247,19 @@ async def list_cases(limit: int = 50):
 
 @router.get("/v1/cases/{case_id}")
 async def get_case(case_id: str):
-    items = _read_jsonl(CASE_STORE, limit=200)
-    for it in items:
-        if it.get("id") == case_id:
-            return it
-    raise HTTPException(status_code=404, detail="case not found")
+    found = _find_case(case_id)
+    if not found:
+        raise HTTPException(status_code=404, detail="case not found")
+    docs = [d for d in _read_jsonl(DOC_STORE, limit=500) if d.get("case_id") == case_id]
+    found = dict(found)
+    found["documents"] = docs
+    found["document_count"] = len(docs)
+    return found
 
 
 @router.post("/v1/cases/{case_id}/notes")
 async def add_case_note(case_id: str, body: CaseNoteIn):
-    """MVP: append a note event (full rewrite of case line not implemented)."""
-    items = _read_jsonl(CASE_STORE, limit=200)
-    found = None
-    for it in items:
-        if it.get("id") == case_id:
-            found = it
-            break
-    if not found:
+    if not _find_case(case_id):
         raise HTTPException(status_code=404, detail="case not found")
     note_rec = {
         "id": _id("note"),
@@ -243,9 +268,91 @@ async def add_case_note(case_id: str, body: CaseNoteIn):
         "note": body.note,
         "human_review_required": True,
     }
-    note_store = ROOT / "data" / "tax_case_notes.jsonl"
-    _append_jsonl(note_store, note_rec)
+    _append_jsonl(ROOT / "data" / "tax_case_notes.jsonl", note_rec)
     return {"ok": True, **note_rec}
+
+
+@router.post("/v1/cases/{case_id}/documents")
+async def upload_case_document(
+    case_id: str,
+    file: UploadFile = File(..., description="فایل مدرک"),
+    doc_type: str = Form(default="other"),
+    title: str = Form(default=""),
+):
+    """آپلود مدرک به پرونده — ذخیره محلی MVP (بدون احراز هویت هنوز)."""
+    if not _find_case(case_id):
+        raise HTTPException(status_code=404, detail="case not found")
+
+    original = file.filename or "upload.bin"
+    safe = _safe_filename(original)
+    ext = Path(safe).suffix.lower()
+    if ext not in ALLOWED_EXT:
+        raise HTTPException(
+            status_code=400,
+            detail=f"نوع فایل مجاز نیست. مجاز: {', '.join(sorted(ALLOWED_EXT))}",
+        )
+
+    data = await file.read()
+    if not data:
+        raise HTTPException(status_code=400, detail="فایل خالی است")
+    if len(data) > MAX_UPLOAD_BYTES:
+        raise HTTPException(status_code=400, detail="حداکثر حجم ۱۵ مگابایت")
+
+    doc_id = _id("doc")
+    case_dir = UPLOAD_ROOT / case_id
+    case_dir.mkdir(parents=True, exist_ok=True)
+    stored_name = f"{doc_id}_{safe}"
+    dest = case_dir / stored_name
+    dest.write_bytes(data)
+
+    text_preview = ""
+    if ext in {".txt", ".md", ".csv"}:
+        try:
+            text_preview = data.decode("utf-8", errors="replace")[:2000]
+        except Exception:
+            text_preview = ""
+
+    rec = {
+        "id": doc_id,
+        "case_id": case_id,
+        "created_at": _now().isoformat(),
+        "original_filename": original,
+        "stored_filename": stored_name,
+        "relative_path": str(dest.relative_to(ROOT)).replace("\\", "/"),
+        "content_type": file.content_type or "application/octet-stream",
+        "size_bytes": len(data),
+        "doc_type": doc_type or "other",
+        "title": title or Path(original).stem,
+        "text_preview": text_preview,
+        "human_review_required": True,
+        "parse_status": "preview_only" if text_preview else "stored_pending_parse",
+    }
+    _append_jsonl(DOC_STORE, rec)
+
+    # Event log linking doc to case (jsonl is append-only; get_case merges docs)
+    link_evt = {
+        "id": _id("evt"),
+        "case_id": case_id,
+        "created_at": _now().isoformat(),
+        "event": "document_uploaded",
+        "document_id": doc_id,
+    }
+    _append_jsonl(ROOT / "data" / "tax_case_events.jsonl", link_evt)
+
+    return {
+        "ok": True,
+        "message": "مدرک به پرونده پیوست شد.",
+        "document": rec,
+        "hint": "استخراج کامل PDF/DOCX در فاز Document AI بعدی است.",
+    }
+
+
+@router.get("/v1/cases/{case_id}/documents")
+async def list_case_documents(case_id: str):
+    if not _find_case(case_id):
+        raise HTTPException(status_code=404, detail="case not found")
+    docs = [d for d in _read_jsonl(DOC_STORE, limit=500) if d.get("case_id") == case_id]
+    return {"case_id": case_id, "items": docs, "count": len(docs)}
 
 
 @router.post("/v1/services/requests")
@@ -270,11 +377,7 @@ async def create_service_request(body: ServiceRequestCreate):
         "human_review_required": True,
     }
     _append_jsonl(SERVICE_STORE, rec)
-    return {
-        "ok": True,
-        "message": "درخواست خدمت ثبت شد.",
-        **rec,
-    }
+    return {"ok": True, "message": "درخواست خدمت ثبت شد.", **rec}
 
 
 @router.get("/v1/services/requests")
