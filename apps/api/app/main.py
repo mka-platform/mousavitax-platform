@@ -1,4 +1,4 @@
-"""MousaviTax API Gateway – health + Tax Waiver + RAG chat (ADR-004)."""
+"""MousaviTax API Gateway – health + Waiver + RAG + Cases/Services (ADR-007)."""
 
 from __future__ import annotations
 
@@ -27,7 +27,6 @@ for sub in (
     if p.exists() and str(p) not in sys.path:
         sys.path.insert(0, str(p))
 
-# Default vector DB relative to repo
 os.environ.setdefault(
     "VECTOR_DB_PATH", str(ROOT / "data" / "iran_tax_vectors.json")
 )
@@ -35,8 +34,8 @@ os.environ.setdefault("EMBEDDING_PROVIDER", "fallback")
 
 app = FastAPI(
     title="MousaviTax API Gateway",
-    version="0.3.3",
-    description="MKA / ARYA – Iran Tax API (waiver + RAG)",
+    version="0.4.0",
+    description="MKA / ARYA – Iran Tax API (waiver + RAG + Tax Case + Services)",
 )
 
 app.add_middleware(
@@ -45,13 +44,23 @@ app.add_middleware(
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:5173",
+        "*",
     ],
     allow_methods=["*"],
     allow_headers=["*"],
     allow_credentials=True,
 )
 
-# ── Knowledge ───────────────────────────────────────────────
+# Cases / services / triage
+try:
+    from cases import router as cases_router
+
+    app.include_router(cases_router)
+except Exception as e:  # pragma: no cover
+    import logging
+
+    logging.getLogger("mousavitax").warning("cases router not loaded: %s", e)
+
 _ks: Any = None
 
 
@@ -72,7 +81,6 @@ def get_knowledge() -> Any:
     return _ks
 
 
-# ── LLM (optional) ──────────────────────────────────────────
 _gateway: Any = None
 
 
@@ -102,12 +110,11 @@ async def health():
     return {
         "status": "ok",
         "service": "mousavitax-api",
-        "version": "0.3.3",
+        "version": "0.4.0",
         "knowledge_chunks": ks.count() if ks else 0,
     }
 
 
-# ── Tax Waiver (unchanged logic) ────────────────────────────
 try:
     from taxlaw_engine import (
         CIRCULAR_CONFIG,
@@ -199,7 +206,6 @@ async def waiver_calculate(body: WaiverCalcRequest):
     out["source"] = body.source
     out["human_review_required"] = True
 
-    # Stage 3: persist calculation log for human review
     import json
     from datetime import datetime, timezone
 
@@ -219,11 +225,8 @@ async def waiver_calculate(body: WaiverCalcRequest):
     return out
 
 
-
-
 @app.get("/v1/tax/waiver/logs")
 async def waiver_logs(limit: int = 50):
-    """MVP list for manager review — protect with auth later."""
     import json
 
     log_path = ROOT / "data" / "waiver_calculations.jsonl"
@@ -231,7 +234,7 @@ async def waiver_logs(limit: int = 50):
         return {"items": [], "count": 0}
     lines = log_path.read_text(encoding="utf-8").strip().splitlines()
     items = []
-    for line in lines[-max(1, min(limit, 200)):]:
+    for line in lines[-max(1, min(limit, 200)) :]:
         try:
             items.append(json.loads(line))
         except Exception:
@@ -247,18 +250,9 @@ async def waiver_smoke():
     return {"tests": run_smoke_tests()}
 
 
-# ── RAG / Chat ──────────────────────────────────────────────
 class RAGRequest(BaseModel):
     query: str = Field(..., min_length=2, max_length=4000)
     top_k: int = Field(default=5, ge=1, le=15)
-
-
-class CitationOut(BaseModel):
-    source_id: str
-    title: str
-    score: float = 0.0
-    page: Optional[int] = None
-    snippet: str = ""
 
 
 def _hits_to_citations(hits: list[dict]) -> list[dict]:
@@ -280,9 +274,8 @@ def _extractive_answer(query: str, hits: list[dict]) -> str:
     if not hits:
         return (
             "در دانش ایندکس‌شده موردی یافت نشد. "
-            "لطفاً `python scripts/seed_knowledge.py` را اجرا کنید "
-            "یا PDF رسمی را در knowledge/official قرار دهید. "
-            "برای پرونده خاص با مشاور رسمی (۰۹۱۵۳۰۶۸۳۲۲) تماس بگیرید."
+            "لطفاً scripts/seed_knowledge.py را اجرا کنید. "
+            "برای پرونده خاص با مشاور رسمی تماس بگیرید."
         )
     parts = [
         f"بر اساس {len(hits)} قطعه دانش بازیابی‌شده (پاسخ استخراجی — بدون LLM):",
@@ -293,10 +286,7 @@ def _extractive_answer(query: str, hits: list[dict]) -> str:
         text = (h.get("text") or "").strip().replace("\n", " ")
         parts.append(f"{i}. [{title}] {text[:420]}")
         parts.append("")
-    parts.append(
-        "— این خلاصه خودکار است و نیاز به بررسی مشاور دارد. "
-        "HUMAN_REVIEW_REQUIRED · ۰۹۱۵۳۰۶۸۳۲۲"
-    )
+    parts.append("— HUMAN_REVIEW_REQUIRED")
     return "\n".join(parts)
 
 
@@ -329,7 +319,6 @@ async def rag_query(body: RAGRequest):
 
     gw = get_gateway()
     provider = os.getenv("LLM_PROVIDER", "").lower()
-    # فقط اگر LLM پیکربندی شده و hit داریم تلاش کن
     if gw is not None and hits and provider in ("ollama", "openai", "openrouter", "gemini"):
         ctx = "\n\n".join(
             f"[{i}] {h.get('title', '')}\n{(h.get('text') or '')[:900]}"
@@ -368,9 +357,6 @@ async def rag_query(body: RAGRequest):
     }
 
 
-
-
-# ── Advisor marketplace requests ─────────────────────────────
 ADVISOR_STORE = ROOT / "data" / "advisor_requests.jsonl"
 
 
@@ -403,28 +389,26 @@ async def advisor_request(body: AdvisorRequestIn):
         "human_review_required": True,
         **body.model_dump(),
     }
-    with ADVISOR_STORE.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(rec, ensure_ascii=False) + "\n")
-    vstatus = "pending_verification" if body.credentials_submitted else "n/a"
     if body.credentials_submitted:
         rec["verification_status"] = "pending_verification"
         rec["status"] = "pending_credential_review"
+    with ADVISOR_STORE.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    vstatus = "pending_verification" if body.credentials_submitted else "n/a"
     return {
         "ok": True,
         "id": rec["id"],
         "message": (
             "مدارک برای اعتبارسنجی انسانی ثبت شد."
             if body.credentials_submitted
-            else "درخواست مشاوره ثبت شد. تیم انسانی بررسی می‌کند."
+            else "درخواست مشاوره ثبت شد."
         ),
         "verification_status": vstatus,
-        "contact_hint": "۰۹۱۵۳۰۶۸۳۲۲",
     }
 
 
 @app.get("/v1/advisors/requests")
 async def list_advisor_requests(limit: int = 50):
-    """MVP: لیست خام برای مدیر — بعداً با احراز هویت محدود شود."""
     import json
 
     if not ADVISOR_STORE.exists():
@@ -440,9 +424,6 @@ async def list_advisor_requests(limit: int = 50):
     return {"items": items, "count": len(items)}
 
 
-
-
-# ── Careers / hiring ─────────────────────────────────────────
 CAREERS_STORE = ROOT / "data" / "career_applications.jsonl"
 
 
@@ -473,11 +454,7 @@ async def careers_apply(body: CareerApplyIn):
     }
     with CAREERS_STORE.open("a", encoding="utf-8") as f:
         f.write(json.dumps(rec, ensure_ascii=False) + "\n")
-    return {
-        "ok": True,
-        "id": rec["id"],
-        "message": "درخواست استخدام ثبت شد و توسط مدیریت بررسی می‌شود.",
-    }
+    return {"ok": True, "id": rec["id"], "message": "درخواست استخدام ثبت شد."}
 
 
 @app.get("/v1/careers/applications")
@@ -488,7 +465,7 @@ async def list_career_applications(limit: int = 50):
         return {"items": [], "count": 0}
     lines = CAREERS_STORE.read_text(encoding="utf-8").strip().splitlines()
     items = []
-    for line in lines[-max(1, min(limit, 200)):]:
+    for line in lines[-max(1, min(limit, 200)) :]:
         try:
             items.append(json.loads(line))
         except Exception:
@@ -502,15 +479,17 @@ async def root():
     ks = get_knowledge()
     return {
         "service": "MousaviTax API Gateway",
-        "version": "0.3.3",
+        "version": "0.4.0",
         "health": "/health",
         "docs": "/docs",
         "knowledge_status": "/v1/knowledge/status",
         "rag": "POST /v1/rag/query",
+        "triage": "POST /v1/triage",
+        "services_catalog": "GET /v1/services/catalog",
+        "service_request": "POST /v1/services/requests",
+        "cases": "POST /v1/cases",
         "waiver_calculate": "POST /v1/tax/waiver/calculate",
-        "waiver_logs": "GET /v1/tax/waiver/logs",
         "advisor_request": "POST /v1/advisors/request",
         "careers_apply": "POST /v1/careers/apply",
         "knowledge_chunks": ks.count() if ks else 0,
-        "note": "Web UI on Next.js :3000",
     }
