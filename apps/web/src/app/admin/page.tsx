@@ -1,102 +1,81 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
-type Tab = "advisors" | "careers" | "waivers";
+type Summary = Record<string, number | string | null> | null;
 
-export default function AdminPage() {
-  const [tab, setTab] = useState<Tab>("advisors");
-  const [items, setItems] = useState<Record<string, unknown>[]>([]);
-  const [count, setCount] = useState(0);
+const CARDS = [
+  { key: "customers", label: "Customers" },
+  { key: "cases", label: "Cases" },
+  { key: "human_reviews", label: "Human Reviews" },
+  { key: "machine_orders", label: "Machine Orders" },
+  { key: "human_services", label: "Human Services" },
+  { key: "revenue", label: "Revenue" },
+  { key: "ai_services", label: "AI Services" },
+  { key: "advisors", label: "Advisors" },
+  { key: "pending", label: "Pending" },
+] as const;
+
+export default function AdminDashboardPage() {
+  const [data, setData] = useState<Summary>(null);
+  const [state, setState] = useState<"loading" | "ok" | "empty" | "error" | "unauthorized">(
+    "loading"
+  );
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const path =
-        tab === "advisors"
-          ? "/v1/advisors/requests"
-          : tab === "careers"
-            ? "/v1/careers/applications"
-            : "/v1/tax/waiver/logs";
-      const res = await fetch(`${API}${path}`);
-      if (!res.ok) throw new Error(await res.text());
-      const data = await res.json();
-      setItems(data.items || []);
-      setCount(data.count || 0);
-    } catch (e) {
-      setError(String(e));
-      setItems([]);
-      setCount(0);
-    } finally {
-      setLoading(false);
-    }
-  }, [tab]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    const token = typeof window !== "undefined" ? localStorage.getItem("mka_token") : null;
+    fetch(`${API}/v1/admin/dashboard/summary`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then(async (r) => {
+        if (r.status === 401 || r.status === 403) {
+          setState("unauthorized");
+          return;
+        }
+        if (!r.ok) throw new Error(await r.text());
+        const j = await r.json();
+        setData(j);
+        setState("ok");
+      })
+      .catch((e) => {
+        setError(String(e));
+        setState("error");
+      });
+  }, []);
 
   return (
-    <main className="mx-auto max-w-4xl space-y-6 px-4 py-10" dir="rtl">
+    <div className="space-y-6" dir="rtl">
       <div>
-        <p className="text-xs text-amber-400">MVP · بدون لاگین — فقط شبکه محلی / مدیر</p>
-        <h1 className="text-2xl font-extrabold">پنل بررسی درخواست‌ها</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          مشاورین، استخدام، لاگ بخشودگی — برای بررسی انسانی
+        <h1 className="text-2xl font-extrabold">Admin Dashboard</h1>
+        <p className="text-sm text-slate-400">
+          داده فقط از API · بدون عدد جعلی · Ledger منبع مالی رسمی
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {(
-          [
-            ["advisors", "مشاورین / اعتبارسنجی"],
-            ["careers", "استخدام"],
-            ["waivers", "لاگ بخشودگی"],
-          ] as const
-        ).map(([k, label]) => (
-          <button
-            key={k}
-            type="button"
-            className={`rounded-xl px-4 py-2 text-sm ${tab === k ? "bg-blue-600 text-white" : "border border-slate-600 text-slate-300"}`}
-            onClick={() => setTab(k)}
-          >
-            {label}
-          </button>
-        ))}
-        <button type="button" className="btn-ghost text-sm" onClick={load} disabled={loading}>
-          {loading ? "…" : "بروزرسانی"}
-        </button>
-      </div>
+      {state === "loading" && <p className="text-sm text-slate-500">در حال بارگذاری…</p>}
+      {state === "unauthorized" && (
+        <p className="rounded-xl border border-amber-600/40 bg-amber-950/30 p-4 text-sm text-amber-100">
+          نیاز به ورود (Bearer token). امنیت در Backend است، نه فقط UI.
+        </p>
+      )}
+      {state === "error" && <p className="text-sm text-red-400">{error}</p>}
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
-      <p className="text-xs text-slate-500">تعداد: {count}</p>
-
-      <div className="space-y-3">
-        {items.length === 0 && !loading && (
-          <div className="card p-6 text-sm text-slate-400">موردی ثبت نشده است.</div>
-        )}
-        {items.map((it, i) => (
-          <div key={String(it.id || i)} className="card space-y-1 p-4 text-sm">
-            <div className="flex flex-wrap justify-between gap-2">
-              <span className="font-semibold text-blue-300">{String(it.id || "—")}</span>
-              <span className="text-xs text-slate-500">{String(it.created_at || "")}</span>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {CARDS.map((c) => {
+          const v = data?.[c.key];
+          const display =
+            state !== "ok" || v === undefined || v === null || v === "" ? "—" : String(v);
+          return (
+            <div key={c.key} className="rounded-2xl border border-slate-700 bg-[#121a2c] p-4">
+              <div className="text-xs text-slate-500">{c.label}</div>
+              <div className="mt-2 text-2xl font-bold tabular-nums">{display}</div>
             </div>
-            <pre className="overflow-x-auto whitespace-pre-wrap text-xs leading-6 text-slate-300">
-              {JSON.stringify(it, null, 2)}
-            </pre>
-          </div>
-        ))}
+          );
+        })}
       </div>
-
-      <Link href="/" className="text-sm text-blue-400">
-        خانه
-      </Link>
-    </main>
+    </div>
   );
 }
