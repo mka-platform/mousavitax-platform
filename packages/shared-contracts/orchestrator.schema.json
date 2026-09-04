@@ -1,0 +1,1 @@
+{"type":"object","required":["status","answer","citations","actions","trace_id"],"properties":{"status":{"enum":["SUCCESS","INSUFFICIENT_DATA","CLARIFICATION_REQUIRED","ERROR"]},"answer":{"type":"string"},"citations":{"type":"array"},"actions":{"type":"array"},"trace_id":{"type":"string"}}}
