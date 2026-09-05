@@ -1,0 +1,1 @@
+import{useState}from"react";export function ConsultationThread({draftAction}:{draftAction?:string}){const[draft,setDraft]=useState(draftAction||"");return <main><h1>گفت‌وگوی مشاوره</h1><textarea value={draft} onChange={e=>setDraft(e.target.value)} placeholder="پیش‌نویس پیام یا اقدام"/></main>}
