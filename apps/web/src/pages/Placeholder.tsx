@@ -1,0 +1,1 @@
+export function Placeholder({title}:{title:string}){return <main><h1>{title}</h1><p>این بخش داده‌های خود را از منبع متصل دریافت خواهد کرد.</p></main>}
