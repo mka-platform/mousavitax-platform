@@ -1,0 +1,1 @@
+export type Status="OK"|"INSUFFICIENT_DATA"|"NEEDS_CLARIFICATION"|"ERROR";export type Citation={id?:string;source_id?:string;title?:string;url?:string;path?:string;document_number?:string};export type ApiResponse={status:Status;answer:string;citations:Citation[];actions?:unknown[];trace_id:string;meta?:Record<string,unknown>};
