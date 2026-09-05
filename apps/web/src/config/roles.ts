@@ -1,0 +1,3 @@
+export type Role = "owner" | "manager" | "expert" | "viewer" | "client" | "consultant";
+export const homePath: Record<Role,string> = { owner:"/dashboard", manager:"/office", expert:"/consultations", viewer:"/ask", client:"/ask", consultant:"/consultations" };
+export const menu: Record<Role,string[]> = { owner:["dashboard","ask","documents","consultations","terms"], manager:["office","ask","documents","consultations","terms"], expert:["consultations","ask","documents","terms"], viewer:["ask","documents","terms"], client:["ask","consultations","terms"], consultant:["consultations","ask","documents","terms"] };
